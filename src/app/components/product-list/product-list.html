@@ -1,0 +1,20 @@
+<section class="product-list">
+  <h2>Produits</h2>
+
+  <div *ngIf="loading" class="status">Chargement des produits...</div>
+  <div *ngIf="error" class="status error">{{ error }}</div>
+
+  <div class="grid" *ngIf="!loading && !error">
+    <div class="card" *ngFor="let p of products">
+      <img [src]="p.image" [alt]="p.name" class="image" />
+      <div class="body">
+        <h3 class="name">{{ p.name }}</h3>
+        <p class="desc">{{ p.description }}</p>
+        <div class="meta">
+          <span class="category">{{ p.category }}</span>
+          <span class="price">{{ p.price | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
