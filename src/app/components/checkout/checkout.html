@@ -1,0 +1,61 @@
+<div class="checkout">
+  <h2>Passer la commande</h2>
+
+  <div class="grid-2">
+    <section class="customer">
+      <h3>Vos informations</h3>
+      <div class="field">
+        <label for="name">Nom complet</label>
+        <input id="name" type="text" [(ngModel)]="name" placeholder="Votre nom" />
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" [(ngModel)]="email" placeholder="Votre email" />
+      </div>
+      <div class="field">
+        <label for="address">Adresse</label>
+        <textarea id="address" rows="3" [(ngModel)]="address" placeholder="Votre adresse de livraison"></textarea>
+      </div>
+    </section>
+
+    <section class="confirm">
+      <h3>Validation</h3>
+      <div class="form-row">
+        <label for="cartId">ID du panier</label>
+        <input id="cartId" type="number" [(ngModel)]="cartIdInput" placeholder="Entrez l'ID du panier" />
+      </div>
+      <button (click)="placeOrder()" [disabled]="loading" class="primary">{{ loading ? 'Traitement...' : 'Valider la commande' }}</button>
+      <p class="error" *ngIf="error">{{ error }}</p>
+    </section>
+  </div>
+
+  <div class="order" *ngIf="order">
+    <h3>Commande créée</h3>
+    <p><strong>N°:</strong> {{ order.id }} | <strong>Date:</strong> {{ order.date }} | <strong>Statut:</strong> {{ order.status }}</p>
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Prix</th>
+          <th>Quantité</th>
+          <th>Sous-total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let it of order.items">
+          <td>{{ it.product.name }}</td>
+          <td>{{ it.price | number:'1.2-2' }} €</td>
+          <td>{{ it.quantity }}</td>
+          <td>{{ (it.price * it.quantity) | number:'1.2-2' }} €</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" class="right"><strong>Total</strong></td>
+          <td><strong>{{ totalAmount | number:'1.2-2' }} €</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

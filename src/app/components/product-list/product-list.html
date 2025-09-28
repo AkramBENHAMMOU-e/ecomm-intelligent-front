@@ -14,10 +14,73 @@
           <span class="category">{{ p.category }}</span>
           <span class="price">{{ p.price | currency:'DH':'symbol':'1.2-2' }}</span>
         </div>
-        <button type="button" (click)="addToCart(p)" [disabled]="adding[p.id]" class="add-btn">
-          {{ adding[p.id] ? 'Ajout...' : 'Ajouter au panier' }}
-        </button>
+        <div class="actions">
+          <label class="qty-label">Qté
+            <input type="number" min="1" [(ngModel)]="quantities[p.id]" (ngModelChange)="$event && (quantities[p.id]=Math.max(1, Math.floor($event)))" />
+          </label>
+          <button type="button" (click)="addToCart(p)" [disabled]="adding[p.id]" class="add-btn">
+            {{ adding[p.id] ? 'Ajout...' : 'Ajouter au panier' }}
+          </button>
+          <button type="button" (click)="openPanel(p)" class="buy-btn">Choisir quantité & Commander</button>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Quick order panel -->
+  <div class="overlay" *ngIf="panelOpen" (click)="closePanel()"></div>
+  <div class="panel" *ngIf="panelOpen">
+    <button class="close" (click)="closePanel()">✕</button>
+    <ng-container *ngIf="selected as s">
+      <div class="panel-header">
+        <img [src]="s.image" [alt]="s.name" />
+        <div>
+          <h3>{{ s.name }}</h3>
+          <p class="price">{{ s.price | currency:'DH':'symbol':'1.2-2' }}</p>
+        </div>
+      </div>
+      <div class="panel-body">
+        <label>Quantité
+          <input type="number" min="1" [(ngModel)]="qty" />
+        </label>
+        <p class="error" *ngIf="panelError">{{ panelError }}</p>
+        <div class="panel-actions">
+          <button (click)="addSelectedToCart()">Ajouter au panier</button>
+          <button class="primary" (click)="buyNow()" [disabled]="placing">
+            {{ placing ? 'Commande en cours...' : 'Commander maintenant' }}
+          </button>
+        </div>
+        <div class="success" *ngIf="lastOrder">
+          Commande #{{ lastOrder.id }} créée avec succès.
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <div class="overlay" *ngIf="cartSidebarOpen" (click)="closeCartSidebar()"></div>
+  <aside class="cart-sidebar" *ngIf="cartSidebarOpen">
+    <button class="close" (click)="closeCartSidebar()">✕</button>
+    <h3>Votre panier</h3>
+
+    <ng-container *ngIf="cart?.items?.length; else emptyCart">
+      <div class="cart-items">
+        <div class="cart-item" *ngFor="let it of cart?.items">
+          <div class="info">
+            <div class="name">{{ it.product.name }}</div>
+            <div class="meta">{{ it.product.price | currency:'DH':'symbol':'1.2-2' }} × {{ it.quantity }}</div>
+          </div>
+          <div class="subtotal">{{ ((it.product.price||0) * (it.quantity||0)) | currency:'DH':'symbol':'1.2-2' }}</div>
+        </div>
+      </div>
+      <div class="cart-footer">
+        <div class="total"><span>Total:</span><strong>{{ cartTotal | currency:'DH':'symbol':'1.2-2' }}</strong></div>
+        <a class="checkout-btn" routerLink="/checkout" (click)="closeCartSidebar()">Aller à la commande</a>
+      </div>
+    </ng-container>
+
+    <ng-template #emptyCart>
+      <p class="empty">Votre panier est vide.</p>
+    </ng-template>
+  </aside>
 </section>

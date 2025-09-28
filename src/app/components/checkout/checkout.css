@@ -1,0 +1,15 @@
+.checkout { max-width: 1000px; margin: 24px auto; padding: 16px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.customer, .confirm { background: #fafafa; padding: 12px; border: 1px solid #eee; border-radius: 8px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.field input, .field textarea { padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+.form-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.form-row input { width: 220px; padding: 8px; }
+.primary { background: #0d6efd; color: #fff; border: none; padding: 10px 12px; border-radius: 6px; cursor: pointer; }
+.error { color: #b00020; margin: 8px 0; }
+.items { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.items th, .items td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
+.items .right { text-align: right; }
+@media (max-width: 780px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
