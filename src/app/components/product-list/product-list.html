@@ -16,12 +16,11 @@
         </div>
         <div class="actions">
           <label class="qty-label">Qté
-            <input type="number" min="1" [(ngModel)]="quantities[p.id]" (ngModelChange)="$event && (quantities[p.id]=Math.max(1, Math.floor($event)))" />
+            <input type="number" min="1" max="99" value="1" [(ngModel)]="quantities[p.id]" (ngModelChange)="updateQuantity(p.id, $event)" placeholder="1" />
           </label>
           <button type="button" (click)="addToCart(p)" [disabled]="adding[p.id]" class="add-btn">
             {{ adding[p.id] ? 'Ajout...' : 'Ajouter au panier' }}
           </button>
-          <button type="button" (click)="openPanel(p)" class="buy-btn">Choisir quantité & Commander</button>
         </div>
       </div>
     </div>
@@ -69,6 +68,12 @@
           <div class="info">
             <div class="name">{{ it.product.name }}</div>
             <div class="meta">{{ it.product.price | currency:'DH':'symbol':'1.2-2' }} × {{ it.quantity }}</div>
+          </div>
+          <div class="quantity-controls">
+            <button class="qty-btn" (click)="updateCartItemQuantity(it, it.quantity - 1)">-</button>
+            <span class="qty-display">{{ it.quantity }}</span>
+            <button class="qty-btn" (click)="updateCartItemQuantity(it, it.quantity + 1)">+</button>
+            <button class="remove-btn" (click)="removeItemFromCart(it)">✕</button>
           </div>
           <div class="subtotal">{{ ((it.product.price||0) * (it.quantity||0)) | currency:'DH':'symbol':'1.2-2' }}</div>
         </div>

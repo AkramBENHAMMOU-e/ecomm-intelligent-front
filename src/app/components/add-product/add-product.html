@@ -1,0 +1,153 @@
+<div class="add-product">
+  <div class="page-header">
+    <h1>{{ isEditMode ? 'Modifier le produit' : 'Ajouter un nouveau produit' }}</h1>
+    <div class="breadcrumb">
+      <a routerLink="/dashboard">Tableau de bord</a>
+      <span class="separator">></span>
+      <span>{{ isEditMode ? 'Modifier' : 'Ajouter' }} produit</span>
+    </div>
+  </div>
+
+  <div class="form-container">
+    <div *ngIf="loading" class="status loading">
+      <span class="spinner"></span>
+      Chargement du produit...
+    </div>
+
+    <div *ngIf="error" class="status error">
+      {{ error }}
+      <button type="button" (click)="onCancel()" class="btn-secondary">Retour au tableau de bord</button>
+    </div>
+
+    <div *ngIf="success" class="status success">
+      {{ success }}
+    </div>
+
+    <form *ngIf="!loading && !error" (ngSubmit)="onSubmit()" class="product-form">
+      <div class="form-grid">
+        <!-- Product Name -->
+        <div class="form-group">
+          <label for="name" class="required">Nom du produit</label>
+          <input 
+            id="name" 
+            type="text" 
+            [(ngModel)]="product.name" 
+            name="name"
+            class="form-control"
+            [class.error]="formErrors['name']"
+            placeholder="Entrez le nom du produit"
+            maxlength="100"
+          />
+          <div *ngIf="formErrors['name']" class="error-message">{{ formErrors['name'] }}</div>
+        </div>
+
+        <!-- Product Category -->
+        <div class="form-group">
+          <label for="category" class="required">Catégorie</label>
+          <select 
+            id="category" 
+            [(ngModel)]="product.category" 
+            name="category"
+            class="form-control"
+            [class.error]="formErrors['category']"
+          >
+            <option value="">Sélectionnez une catégorie</option>
+            <option value="Électronique">Électronique</option>
+            <option value="Vêtements">Vêtements</option>
+            <option value="Maison & Jardin">Maison & Jardin</option>
+            <option value="Sports & Loisirs">Sports & Loisirs</option>
+            <option value="Livres">Livres</option>
+            <option value="Beauté & Santé">Beauté & Santé</option>
+            <option value="Automobiles">Automobiles</option>
+            <option value="Autre">Autre</option>
+          </select>
+          <div *ngIf="formErrors['category']" class="error-message">{{ formErrors['category'] }}</div>
+        </div>
+
+        <!-- Product Price -->
+        <div class="form-group">
+          <label for="price" class="required">Prix (DH)</label>
+          <input 
+            id="price" 
+            type="number" 
+            [(ngModel)]="product.price" 
+            name="price"
+            class="form-control"
+            [class.error]="formErrors['price']"
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+          />
+          <div *ngIf="formErrors['price']" class="error-message">{{ formErrors['price'] }}</div>
+        </div>
+
+        <!-- Product Quantity -->
+        <div class="form-group">
+          <label for="quantity" class="required">Quantité</label>
+          <input 
+            id="quantity" 
+            type="number" 
+            [(ngModel)]="product.quantity" 
+            name="quantity"
+            class="form-control"
+            [class.error]="formErrors['quantity']"
+            placeholder="1"
+            min="1"
+            max="9999"
+            step="1"
+          />
+          <div *ngIf="formErrors['quantity']" class="error-message">{{ formErrors['quantity'] }}</div>
+        </div>
+
+        <!-- Product Image URL -->
+        <div class="form-group">
+          <label for="image">URL de l'image</label>
+          <input 
+            id="image" 
+            type="url" 
+            [(ngModel)]="product.image" 
+            name="image"
+            class="form-control"
+            [class.error]="formErrors['image']"
+            placeholder="https://example.com/image.jpg (optionnel)"
+          />
+          <div *ngIf="formErrors['image']" class="error-message">{{ formErrors['image'] }}</div>
+          <div *ngIf="product.image && !formErrors['image']" class="image-preview">
+            <img [src]="product.image" [alt]="product.name" (error)="formErrors['image'] = 'Image non trouvée'" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Description -->
+      <div class="form-group full-width">
+        <label for="description">Description (Optionnelle)</label>
+        <textarea 
+          id="description" 
+          [(ngModel)]="product.description" 
+          name="description"
+          class="form-control"
+          [class.error]="formErrors['description']"
+          placeholder="Décrivez le produit en détail..."
+          rows="4"
+          maxlength="500"
+        ></textarea>
+        <div class="char-count">{{ (product.description.length || 0) }}/500 caractères</div>
+        <div *ngIf="formErrors['description']" class="error-message">{{ formErrors['description'] }}</div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" (click)="onCancel()" class="btn-secondary">
+          Annuler
+        </button>
+        <button type="button" (click)="onReset()" class="btn-outline">
+          {{ isEditMode ? 'Réinitialiser' : 'Effacer' }}
+        </button>
+        <button type="submit" [disabled]="saving" class="btn-primary">
+          <span *ngIf="saving" class="spinner-small"></span>
+          {{ saving ? 'Sauvegarde...' : (isEditMode ? 'Mettre à jour' : 'Créer le produit') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

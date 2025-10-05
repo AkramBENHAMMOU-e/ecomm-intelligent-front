@@ -1,0 +1,86 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h1>Tableau de bord - Gestion des produits</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-primary" (click)="navigateToAddProduct()">
+        <span class="icon">+</span>
+        Ajouter un produit
+      </button>
+      <button type="button" class="btn-secondary" (click)="refreshProducts()">
+        <span class="icon">↻</span>
+        Actualiser
+      </button>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <div *ngIf="loading" class="status loading">
+      <span class="spinner"></span>
+      Chargement des produits...
+    </div>
+    
+    <div *ngIf="error" class="status error">
+      {{ error }}
+      <button type="button" (click)="refreshProducts()" class="retry-btn">Réessayer</button>
+    </div>
+
+    <div *ngIf="!loading && !error" class="products-section">
+      <div class="section-header">
+        <h2>Liste des produits ({{ products.length }})</h2>
+      </div>
+
+      <div *ngIf="products.length === 0" class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>Aucun produit trouvé</h3>
+        <p>Commencez par ajouter votre premier produit</p>
+        <button type="button" class="btn-primary" (click)="navigateToAddProduct()">
+          Ajouter un produit
+        </button>
+      </div>
+
+      <div *ngIf="products.length > 0" class="products-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Nom</th>
+              <th>Description</th>
+              <th>Catégorie</th>
+              <th>Prix</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of products" class="product-row">
+              <td class="image-cell">
+                <img [src]="product.image" [alt]="product.name" class="product-image" />
+              </td>
+              <td class="name-cell">
+                <strong>{{ product.name }}</strong>
+              </td>
+              <td class="description-cell">
+                <span class="description-text">{{ product.description }}</span>
+              </td>
+              <td class="category-cell">
+                <span class="category-badge">{{ product.category }}</span>
+              </td>
+              <td class="price-cell">
+                <span class="price">{{ product.price | currency:'DH':'symbol':'1.2-2' }}</span>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button type="button" class="btn-edit" (click)="editProduct(product.id)" title="Modifier">
+                    ✏️
+                  </button>
+                  <button type="button" class="btn-delete" (click)="deleteProduct(product)" title="Supprimer">
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

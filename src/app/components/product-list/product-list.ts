@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Product } from '../../models/product.model';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
-import { Cart } from '../../models/cart.model';
+import { Cart, CartItem } from '../../models/cart.model';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 
@@ -54,6 +54,12 @@ export class ProductList implements OnInit {
     this.productService.getProducts().subscribe({
       next: (data) => {
         this.products = data ?? [];
+        // Initialize default quantities for all products
+        this.products.forEach(product => {
+          if (!this.quantities[product.id]) {
+            this.quantities[product.id] = 1;
+          }
+        });
         this.loading = false;
       },
       error: (err) => {
@@ -98,6 +104,65 @@ export class ProductList implements OnInit {
   get cartTotal(): number {
     if (!this.cart?.items) return 0;
     return this.cart.items.reduce((sum, it) => sum + (it.product?.price || 0) * (it.quantity || 0), 0);
+  }
+
+  updateQuantity(productId: number, value: number | null): void {
+    if (value === null || value === undefined) {
+      this.quantities[productId] = 1;
+      return;
+    }
+    // Ensure minimum quantity is 1 and maximum is 99
+    const quantity = Math.max(1, Math.min(99, Math.floor(value)));
+    this.quantities[productId] = quantity;
+  }
+
+ 
+  updateCartItemQuantity(item: CartItem, newQuantity: number): void {
+    if (!this.cartId || newQuantity < 1) return;
+    
+    // If quantity is 0, remove the item
+    if (newQuantity === 0) {
+      this.removeItemFromCart(item);
+      return;
+    }
+    
+    const itemId = item.id;
+    if (itemId === undefined) return;
+    
+    this.cartService.updateItemQuantity(this.cartId, itemId, newQuantity).subscribe({
+      next: (updatedCart) => {
+        this.cart = updatedCart;
+        // Update local storage if cart ID changed
+        if (updatedCart?.id && updatedCart.id !== this.cartId) {
+          this.cartId = updatedCart.id;
+          localStorage.setItem('cartId', String(this.cartId));
+        }
+      },
+      error: (err) => {
+        console.error('Failed to update item quantity', err);
+        alert('Impossible de mettre à jour la quantité.');
+      }
+    });
+  }
+
+  // New method to remove item from cart
+  removeItemFromCart(item: CartItem): void {
+    if (!this.cartId || item.id === undefined) return;
+    
+    this.cartService.removeItemFromCart(this.cartId, item.id).subscribe({
+      next: (updatedCart) => {
+        this.cart = updatedCart;
+        // Update local storage if cart ID changed
+        if (updatedCart?.id && updatedCart.id !== this.cartId) {
+          this.cartId = updatedCart.id;
+          localStorage.setItem('cartId', String(this.cartId));
+        }
+      },
+      error: (err) => {
+        console.error('Failed to remove item from cart', err);
+        alert('Impossible de supprimer l\'article du panier.');
+      }
+    });
   }
 
   addToCart(product: Product): void {
@@ -176,7 +241,7 @@ export class ProductList implements OnInit {
         next: (updatedCart) => {
           if (updatedCart?.id && updatedCart.id !== this.cartId) {
             this.cartId = updatedCart.id;
-            localStorage.setItem('cartId', String(updatedCart.id));
+            localStorage.setItem('cartId', String(this.cartId));
           }
           alert('Article ajouté au panier.');
         },

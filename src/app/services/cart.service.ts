@@ -26,6 +26,16 @@ export class CartService {
     return this.http.post<Cart>(`${this.baseUrl}/${cartId}/items`, request);
   }
 
+  // Add method to update item quantity
+  updateItemQuantity(cartId: number, itemId: number, quantity: number): Observable<Cart> {
+    return this.http.put<Cart>(`${this.baseUrl}/${cartId}/items/${itemId}`, { quantity });
+  }
+
+
+  removeItemFromCart(cartId: number, itemId: number): Observable<Cart> {
+    return this.http.delete<Cart>(`${this.baseUrl}/${cartId}/items/${itemId}`);
+  }
+
   deleteCart(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
