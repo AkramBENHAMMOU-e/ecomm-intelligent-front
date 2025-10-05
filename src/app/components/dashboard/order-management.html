@@ -1,0 +1,101 @@
+<div class="order-management">
+  <div class="dashboard-header">
+    <h1>Gestion des commandes</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="refreshOrders()">
+        <span class="icon">↻</span>
+        Actualiser
+      </button>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <div *ngIf="loading" class="status loading">
+      <span class="spinner"></span>
+      Chargement des commandes...
+    </div>
+    
+    <div *ngIf="error" class="status error">
+      {{ error }}
+      <button type="button" (click)="refreshOrders()" class="retry-btn">Réessayer</button>
+    </div>
+
+    <div *ngIf="!loading && !error" class="orders-section">
+      <div class="section-header">
+        <h2>Liste des commandes ({{ orders.length }})</h2>
+      </div>
+
+      <div *ngIf="orders.length === 0" class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>Aucune commande trouvée</h3>
+        <p>Les commandes apparaîtront ici une fois passées par les clients</p>
+      </div>
+
+      <div *ngIf="orders.length > 0" class="orders-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Articles</th>
+              <th>Total</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of orders" class="order-row">
+              <td class="id-cell">
+                <strong>#{{ order.id }}</strong>
+              </td>
+              <td class="date-cell">
+                <span>{{ order.date | date:'short' }}</span>
+              </td>
+              <td class="status-cell">
+                <div *ngIf="editingOrderId !== order.id; else editStatus">
+                  <span class="status-badge" [ngClass]="getStatusClass(order.status)">{{ order.status }}</span>
+                </div>
+                <ng-template #editStatus>
+                  <select [(ngModel)]="newStatus" class="status-select">
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </ng-template>
+              </td>
+              <td class="items-cell">
+                <span>{{ order.items.length }} article(s)</span>
+              </td>
+              <td class="total-cell">
+                <span class="total">{{ getOrderTotal(order) | currency:'DH':'symbol':'1.2-2' }}</span>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button type="button" class="btn-view" (click)="viewOrder(order)" title="Voir détails">
+                    👁️
+                  </button>
+                  <div *ngIf="editingOrderId !== order.id; else saveCancelButtons">
+                    <button type="button" class="btn-edit" (click)="startEditing(order)" title="Modifier statut">
+                      ✏️
+                    </button>
+                    <button type="button" class="btn-delete" (click)="deleteOrder(order)" title="Supprimer">
+                      🗑️
+                    </button>
+                  </div>
+                  <ng-template #saveCancelButtons>
+                    <button type="button" class="btn-save" (click)="saveStatus(order)" title="Enregistrer">
+                      💾
+                    </button>
+                    <button type="button" class="btn-cancel" (click)="cancelEditing()" title="Annuler">
+                      ❌
+                    </button>
+                  </ng-template>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -7,11 +7,11 @@ export interface OrderItem {
   price: number;
 }
 
-export type StatusOrder = 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | string;
+export type StatusOrder = 'Processing' | 'Shipped' | 'Completed';
 
 export interface Order {
   id?: number;
-  date?: string; // ISO date from backend
+  date?: string; 
   status?: StatusOrder;
   customer?: any;
   items: OrderItem[];

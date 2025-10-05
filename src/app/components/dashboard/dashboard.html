@@ -13,6 +13,12 @@
     </div>
   </div>
 
+  <!-- Navigation Tabs -->
+  <div class="dashboard-tabs">
+    <button class="tab-btn active" (click)="switchToProducts()">Produits</button>
+    <button class="tab-btn" (click)="switchToOrders()">Commandes</button>
+  </div>
+
   <div class="dashboard-content">
     <div *ngIf="loading" class="status loading">
       <span class="spinner"></span>
@@ -83,4 +89,9 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Order Management Section (Hidden by default) -->
+<div class="order-management-section" *ngIf="showOrders">
+  <app-order-management></app-order-management>
 </div>

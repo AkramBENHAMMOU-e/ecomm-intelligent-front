@@ -103,6 +103,39 @@
   cursor: pointer;
 }
 
+/* Dashboard Tabs */
+.dashboard-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  background: none;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.tab-btn.active {
+  background-color: white;
+  color: #007bff;
+  border-color: #dee2e6;
+  border-bottom-color: white;
+  margin-bottom: -1px;
+}
+
 .section-header {
   margin-bottom: 20px;
 }
@@ -228,6 +261,10 @@
   background-color: #c82333;
 }
 
+.order-management-section {
+  margin-top: 20px;
+}
+
 @media (max-width: 768px) {
   .dashboard-header {
     flex-direction: column;
@@ -237,6 +274,14 @@
   
   .header-actions {
     justify-content: center;
+  }
+  
+  .dashboard-tabs {
+    overflow-x: auto;
+  }
+  
+  .tab-btn {
+    white-space: nowrap;
   }
   
   .products-table {

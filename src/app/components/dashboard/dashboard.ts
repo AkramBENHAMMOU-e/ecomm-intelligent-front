@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Product } from '../../models/product.model';
 import { ProductService } from '../../services/product.service';
+import { OrderManagement } from './order-management';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,6 +14,7 @@ export class Dashboard implements OnInit {
   products: Product[] = [];
   loading = false;
   error: string | null = null;
+  showOrders = false;
 
   constructor(
     private productService: ProductService,
@@ -64,5 +66,13 @@ export class Dashboard implements OnInit {
 
   refreshProducts(): void {
     this.loadProducts();
+  }
+
+  switchToProducts(): void {
+    this.showOrders = false;
+  }
+
+  switchToOrders(): void {
+    this.showOrders = true;
   }
 }
