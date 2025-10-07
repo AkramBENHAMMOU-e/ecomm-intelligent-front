@@ -1,27 +1,43 @@
 <section class="product-list">
   <h2>Produits</h2>
 
+  <!-- Barre de recherche -->
+  <div class="search-bar" *ngIf="!loading">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Rechercher un produit (nom, catégorie, description)"
+    />
+  </div>
+
   <div *ngIf="loading" class="status">Chargement des produits...</div>
   <div *ngIf="error" class="status error">{{ error }}</div>
 
-  <div class="grid" *ngIf="!loading && !error">
-    <div class="card" *ngFor="let p of products">
-      <img [src]="p.image" [alt]="p.name" class="image" />
-      <div class="body">
-        <h3 class="name">{{ p.name }}</h3>
-        <p class="desc">{{ p.description }}</p>
-        <div class="meta">
-          <span class="category">{{ p.category }}</span>
-          <span class="price">{{ p.price | currency:'DH':'symbol':'1.2-2' }}</span>
+  <!-- Etat vide pour aucune correspondance -->
+  <div *ngIf="!loading && !error && filteredProducts.length === 0" class="status">
+    Aucun produit ne correspond à "{{ searchTerm }}".
+  </div>
+
+  <div class="grid" *ngIf="!loading && !error && filteredProducts.length > 0">
+    <div class="card" *ngFor="let p of filteredProducts">
+      <a [routerLink]="['/product', p.id]" class="product-link">
+        <img [src]="p.image" [alt]="p.name" class="image" />
+        <div class="body">
+          <h3 class="name">{{ p.name }}</h3>
+          <p class="desc">{{ p.description }}</p>
+          <div class="meta">
+            <span class="category">{{ p.category }}</span>
+            <span class="price">{{ p.price | currency:'DH':'symbol':'1.2-2' }}</span>
+          </div>
         </div>
-        <div class="actions">
-          <label class="qty-label">Qté
-            <input type="number" min="1" max="99" value="1" [(ngModel)]="quantities[p.id]" (ngModelChange)="updateQuantity(p.id, $event)" placeholder="1" />
-          </label>
-          <button type="button" (click)="addToCart(p)" [disabled]="adding[p.id]" class="add-btn">
-            {{ adding[p.id] ? 'Ajout...' : 'Ajouter au panier' }}
-          </button>
-        </div>
+      </a>
+      <div class="actions">
+        <label class="qty-label">Qté
+          <input type="number" min="1" max="99" value="1" [(ngModel)]="quantities[p.id]" (ngModelChange)="updateQuantity(p.id, $event)" placeholder="1" />
+        </label>
+        <button type="button" (click)="addToCart(p)" [disabled]="adding[p.id]" class="add-btn">
+          {{ adding[p.id] ? 'Ajout...' : 'Ajouter au panier' }}
+        </button>
       </div>
     </div>
   </div>

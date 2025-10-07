@@ -4,6 +4,7 @@ import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { Cart, CartItem } from '../../models/cart.model';
 import { OrderService } from '../../services/order.service';
+import { RecommendationService } from '../../services/recommendation.service';
 import { Order } from '../../models/order.model';
 
 @Component({
@@ -13,12 +14,12 @@ import { Order } from '../../models/order.model';
   styleUrl: './product-list.css'
 })
 export class ProductList implements OnInit {
-  // Expose Math to template (fix TS2339 in template)
   public readonly Math = Math;
 
   products: Product[] = [];
   loading = false;
   error: string | null = null;
+  searchTerm: string = '';
 
   // Cart state
   private cartId: number | null = null;
@@ -37,10 +38,16 @@ export class ProductList implements OnInit {
   lastOrder: Order | null = null;
   panelError: string | null = null;
 
+  // Recommendations state
+  recLoading = false;
+  recError: string | null = null;
+  recommendations: Product[] = [];
+
   constructor(
     private productService: ProductService,
     private cartService: CartService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private recommendationService: RecommendationService
   ) {}
 
   ngOnInit(): void {
@@ -116,19 +123,31 @@ export class ProductList implements OnInit {
     this.quantities[productId] = quantity;
   }
 
- 
+  // Filtered products based on search term
+  get filteredProducts(): Product[] {
+    const term = (this.searchTerm || '').trim().toLowerCase();
+    if (!term) return this.products;
+    return this.products.filter(p => {
+      const name = (p.name || '').toLowerCase();
+      const desc = (p.description || '').toLowerCase();
+      const cat = (p.category || '').toLowerCase();
+      return name.includes(term) || desc.includes(term) || cat.includes(term);
+    });
+  }
+
+
   updateCartItemQuantity(item: CartItem, newQuantity: number): void {
     if (!this.cartId || newQuantity < 1) return;
-    
+
     // If quantity is 0, remove the item
     if (newQuantity === 0) {
       this.removeItemFromCart(item);
       return;
     }
-    
+
     const itemId = item.id;
     if (itemId === undefined) return;
-    
+
     this.cartService.updateItemQuantity(this.cartId, itemId, newQuantity).subscribe({
       next: (updatedCart) => {
         this.cart = updatedCart;
@@ -148,7 +167,7 @@ export class ProductList implements OnInit {
   // New method to remove item from cart
   removeItemFromCart(item: CartItem): void {
     if (!this.cartId || item.id === undefined) return;
-    
+
     this.cartService.removeItemFromCart(this.cartId, item.id).subscribe({
       next: (updatedCart) => {
         this.cart = updatedCart;
@@ -215,7 +234,7 @@ export class ProductList implements OnInit {
     }
   }
 
- 
+
   openPanel(p: Product): void {
     this.selected = p;
     this.qty = 1;

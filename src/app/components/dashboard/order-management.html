@@ -14,7 +14,7 @@
       <span class="spinner"></span>
       Chargement des commandes...
     </div>
-    
+
     <div *ngIf="error" class="status error">
       {{ error }}
       <button type="button" (click)="refreshOrders()" class="retry-btn">Réessayer</button>
@@ -39,6 +39,7 @@
               <th>Date</th>
               <th>Statut</th>
               <th>Articles</th>
+              <th>Quantité</th>
               <th>Total</th>
               <th>Actions</th>
             </tr>
@@ -49,7 +50,7 @@
                 <strong>#{{ order.id }}</strong>
               </td>
               <td class="date-cell">
-                <span>{{ order.date | date:'short' }}</span>
+                <span>{{ order.date | date:'dd/MM/yyyy' }}</span>
               </td>
               <td class="status-cell">
                 <div *ngIf="editingOrderId !== order.id; else editStatus">
@@ -65,6 +66,9 @@
               </td>
               <td class="items-cell">
                 <span>{{ order.items.length }} article(s)</span>
+              </td>
+              <td class="quantity-cell">
+                <span>{{ getOrderQuantity(order) }}</span>
               </td>
               <td class="total-cell">
                 <span class="total">{{ getOrderTotal(order) | currency:'DH':'symbol':'1.2-2' }}</span>

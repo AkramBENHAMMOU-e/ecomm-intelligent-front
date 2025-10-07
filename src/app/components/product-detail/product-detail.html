@@ -1,0 +1,78 @@
+<div class="product-detail-container" *ngIf="!loading && product">
+  <button class="back-button" (click)="goBack()">
+    <span>←</span> Retour aux produits
+  </button>
+
+  <div class="product-detail">
+    <div class="product-image-section">
+      <img [src]="product.image" [alt]="product.name" class="product-image" />
+    </div>
+
+    <div class="product-info-section">
+      <div class="product-header">
+        <h1 class="product-title">{{ product.name }}</h1>
+        <span class="product-category">{{ product.category }}</span>
+      </div>
+
+      <div class="product-price">
+        {{ product.price | currency:'DH':'symbol':'1.2-2' }}
+      </div>
+
+      <div class="product-description">
+        <h3>Description</h3>
+        <p>{{ product.description }}</p>
+      </div>
+
+      <div class="product-stock" *ngIf="product.quantity > 0">
+        <span class="stock-available">✓ En stock ({{ product.quantity }} disponibles)</span>
+      </div>
+      <div class="product-stock out-of-stock" *ngIf="product.quantity === 0">
+        <span>✗ Rupture de stock</span>
+      </div>
+
+      <div class="product-actions">
+        <div class="quantity-selector">
+          <label>Quantité:</label>
+          <div class="quantity-controls">
+            <button class="qty-btn" (click)="decreaseQuantity()">-</button>
+            <input type="number" min="1" [(ngModel)]="quantity" class="qty-input" />
+            <button class="qty-btn" (click)="increaseQuantity()">+</button>
+          </div>
+        </div>
+
+        <button 
+          class="add-to-cart-btn" 
+          (click)="addToCart()" 
+          [disabled]="adding || product.quantity === 0"
+        >
+          {{ adding ? 'Ajout en cours...' : 'Ajouter au panier' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section des produits recommandés -->
+  <div class="recommendations-section" *ngIf="recommendedProducts.length > 0">
+    <h2 class="recommendations-title">Produits similaires</h2>
+    <div class="recommendations-grid">
+      <div class="recommendation-card" *ngFor="let rec of recommendedProducts" (click)="goToProduct(rec.id)">
+        <img [src]="rec.image" [alt]="rec.name" class="rec-image" />
+        <div class="rec-body">
+          <h4 class="rec-name">{{ rec.name }}</h4>
+          <p class="rec-category">{{ rec.category }}</p>
+          <p class="rec-price">{{ rec.price | currency:'DH':'symbol':'1.2-2' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="loading">
+  <p class="loading-text">Chargement du produit...</p>
+</div>
+
+<div class="error-container" *ngIf="error && !loading">
+  <p class="error-text">{{ error }}</p>
+  <button class="back-button" (click)="goBack()">Retour aux produits</button>
+</div>
+

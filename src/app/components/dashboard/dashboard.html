@@ -28,7 +28,7 @@
       <span class="spinner"></span>
       Chargement des produits...
     </div>
-    
+
     <div *ngIf="error" class="status error">
       {{ error }}
       <button type="button" (click)="refreshProducts()" class="retry-btn">Réessayer</button>
@@ -36,7 +36,7 @@
 
     <div *ngIf="!loading && !error" class="products-section">
       <div class="section-header">
-        <h2>Liste des produits ({{ products.length }})</h2>
+        <h2>Liste des produits ({{ filteredProducts.length }})</h2>
       </div>
 
       <div *ngIf="products.length === 0" class="empty-state">
@@ -48,7 +48,23 @@
         </button>
       </div>
 
-      <div *ngIf="products.length > 0" class="products-table">
+      <!-- Barre de recherche visible lorsqu'il existe au moins un produit -->
+      <div class="search-bar" *ngIf="products.length > 0">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher (nom, catégorie, description)"
+        />
+      </div>
+
+      <!-- Etat vide quand aucune correspondance avec la recherche -->
+      <div *ngIf="products.length > 0 && filteredProducts.length === 0" class="empty-state">
+        <div class="empty-icon">🔎</div>
+        <h3>Aucune correspondance</h3>
+        <p>Aucun produit ne correspond à "{{ searchTerm }}".</p>
+      </div>
+
+      <div *ngIf="filteredProducts.length > 0" class="products-table">
         <table>
           <thead>
             <tr>
@@ -61,7 +77,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let product of products" class="product-row">
+            <tr *ngFor="let product of filteredProducts" class="product-row">
               <td class="image-cell">
                 <img [src]="product.image" [alt]="product.name" class="product-image" />
               </td>

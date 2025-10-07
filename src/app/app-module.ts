@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { ProductList } from './components/product-list/product-list';
+import { ProductDetailComponent } from './components/product-detail/product-detail';
 import { CheckoutComponent } from './components/checkout/checkout';
 import { Dashboard } from './components/dashboard/dashboard';
 import { AddProduct } from './components/add-product/add-product';
@@ -20,6 +21,7 @@ import { adminGuard } from './guards/admin-guard';
   declarations: [
     App,
     ProductList,
+    ProductDetailComponent,
     CheckoutComponent,
     Dashboard,
     AddProduct,

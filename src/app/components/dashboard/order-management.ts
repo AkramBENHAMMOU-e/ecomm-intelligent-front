@@ -51,6 +51,10 @@ export class OrderManagement implements OnInit {
     return order.items.reduce((total, item) => total + (item.price * item.quantity), 0);
   }
 
+  getOrderQuantity(order: Order): number {
+    return order.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+  }
+
   getStatusClass(status?: StatusOrder): string {
     switch (status) {
       case 'Processing':
@@ -90,7 +94,7 @@ Articles: ${order.items.length}`);
     if (!this.editingOrderId) return;
 
     const updatedOrder = { ...order, status: this.newStatus };
-    
+
     this.orderService.updateOrder(this.editingOrderId, updatedOrder).subscribe({
       next: (updatedOrder) => {
         console.log('Order updated successfully:', updatedOrder);

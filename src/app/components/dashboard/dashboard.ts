@@ -15,6 +15,7 @@ export class Dashboard implements OnInit {
   loading = false;
   error: string | null = null;
   showOrders = false;
+  searchTerm: string = '';
 
   constructor(
     private productService: ProductService,
@@ -67,6 +68,18 @@ export class Dashboard implements OnInit {
 
   refreshProducts(): void {
     this.loadProducts();
+  }
+
+  // Filtered products based on search term (dashboard)
+  get filteredProducts(): Product[] {
+    const term = (this.searchTerm || '').trim().toLowerCase();
+    if (!term) return this.products;
+    return this.products.filter(p => {
+      const name = (p.name || '').toLowerCase();
+      const desc = (p.description || '').toLowerCase();
+      const cat = (p.category || '').toLowerCase();
+      return name.includes(term) || desc.includes(term) || cat.includes(term);
+    });
   }
 
   switchToProducts(): void {
