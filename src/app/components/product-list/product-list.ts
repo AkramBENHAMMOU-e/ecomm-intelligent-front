@@ -166,7 +166,7 @@ export class ProductList implements OnInit {
   }
 
   addToCart(product: Product): void {
-    if (this.adding[product.id]) return; // prevent double-clicks
+    if (this.adding[product.id]) return;
     this.adding[product.id] = true;
 
     const quantity = Math.max(1, Math.floor(this.quantities[product.id] || 1));
@@ -215,7 +215,7 @@ export class ProductList implements OnInit {
     }
   }
 
-  // Quick order panel handlers
+ 
   openPanel(p: Product): void {
     this.selected = p;
     this.qty = 1;

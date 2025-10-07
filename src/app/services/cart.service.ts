@@ -26,7 +26,7 @@ export class CartService {
     return this.http.post<Cart>(`${this.baseUrl}/${cartId}/items`, request);
   }
 
-  // Add method to update item quantity
+ 
   updateItemQuantity(cartId: number, itemId: number, quantity: number): Observable<Cart> {
     return this.http.put<Cart>(`${this.baseUrl}/${cartId}/items/${itemId}`, { quantity });
   }

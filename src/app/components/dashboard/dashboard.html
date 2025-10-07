@@ -10,6 +10,10 @@
         <span class="icon">↻</span>
         Actualiser
       </button>
+      <button type="button" class="btn-danger" (click)="logout()">
+        <span class="icon">🚪</span>
+        Déconnexion
+      </button>
     </div>
   </div>
 
@@ -94,4 +98,9 @@
 <!-- Order Management Section (Hidden by default) -->
 <div class="order-management-section" *ngIf="showOrders">
   <app-order-management></app-order-management>
+</div>
+
+<!-- Router outlet for child components -->
+<div class="child-content">
+  <router-outlet></router-outlet>
 </div>

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Product } from '../../models/product.model';
 import { ProductService } from '../../services/product.service';
-import { OrderManagement } from './order-management';
+import { Auth } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,7 +18,8 @@ export class Dashboard implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private router: Router
+    private router: Router,
+    private authService: Auth
   ) {}
 
   ngOnInit(): void {
@@ -42,11 +43,11 @@ export class Dashboard implements OnInit {
   }
 
   navigateToAddProduct(): void {
-    this.router.navigate(['/add-product']);
+    this.router.navigate(['add-product'], { relativeTo: this.router.routerState.root.firstChild });
   }
 
   editProduct(productId: number): void {
-    this.router.navigate(['/add-product', productId]);
+    this.router.navigate(['add-product', productId], { relativeTo: this.router.routerState.root.firstChild });
   }
 
   deleteProduct(product: Product): void {
@@ -74,5 +75,10 @@ export class Dashboard implements OnInit {
 
   switchToOrders(): void {
     this.showOrders = true;
+  }
+
+  // Method to handle admin logout
+  logout(): void {
+    this.authService.logout();
   }
 }

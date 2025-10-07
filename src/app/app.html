@@ -1,7 +1,8 @@
-<nav class="topbar">
+<nav class="topbar" *ngIf="showNavbar">
   <a routerLink="/">Accueil</a>
-  <a routerLink="/dashboard">Tableau de bord</a>
+  <a routerLink="/dashboard" *ngIf="isAdmin()">Tableau de bord</a>
   <a routerLink="/checkout">Passer la commande</a>
+  <button class="logout-btn" (click)="logout()" *ngIf="isAdmin()">Déconnexion</button>
 </nav>
 <main class="content">
   <router-outlet></router-outlet>

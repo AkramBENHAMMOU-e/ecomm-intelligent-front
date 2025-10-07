@@ -13,7 +13,9 @@ export class OrderManagement implements OnInit {
   orders: Order[] = [];
   loading = false;
   error: string | null = null;
+  // Add a property to track which order is being edited
   editingOrderId: number | null = null;
+  // Add a property to store the new status when editing
   newStatus: StatusOrder = 'Processing';
 
   constructor(
@@ -63,20 +65,27 @@ export class OrderManagement implements OnInit {
   }
 
   viewOrder(order: Order): void {
+    // For now, we'll just show an alert with order details
+    // In a more complete implementation, this would navigate to an order details page
     alert(`Commande #${order.id}
 Statut: ${order.status}
 Date: ${order.date}
 Total: ${this.getOrderTotal(order)} DH
 Articles: ${order.items.length}`);
   }
+
+  // Method to start editing an order's status
   startEditing(order: Order): void {
     this.editingOrderId = order.id!;
     this.newStatus = order.status || 'Processing';
   }
 
+  // Method to cancel editing
   cancelEditing(): void {
     this.editingOrderId = null;
   }
+
+  // Method to save the updated status
   saveStatus(order: Order): void {
     if (!this.editingOrderId) return;
 
@@ -85,10 +94,12 @@ Articles: ${order.items.length}`);
     this.orderService.updateOrder(this.editingOrderId, updatedOrder).subscribe({
       next: (updatedOrder) => {
         console.log('Order updated successfully:', updatedOrder);
+        // Update the order in the local array
         const index = this.orders.findIndex(o => o.id === this.editingOrderId);
         if (index !== -1) {
           this.orders[index] = updatedOrder;
         }
+        // Exit editing mode
         this.editingOrderId = null;
       },
       error: (err) => {
