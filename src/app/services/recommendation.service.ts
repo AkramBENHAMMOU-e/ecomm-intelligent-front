@@ -18,4 +18,13 @@ export class RecommendationService {
     const params = new HttpParams().set('limit', limit);
     return this.http.get<Product[]>(`${this.baseUrl}/product/${productId}`, { params });
   }
+
+  /**
+   * Retourne les produits les plus populaires (les plus commandés)
+   * GET /api/recommendations/popular?limit=5
+   */
+  getPopular(limit = 5): Observable<Product[]> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<Product[]>(`${this.baseUrl}/popular`, { params });
+  }
 }

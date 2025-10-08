@@ -43,6 +43,10 @@ export class ProductList implements OnInit {
   recError: string | null = null;
   recommendations: Product[] = [];
 
+  // Popular products state
+  popularProducts: Product[] = [];
+  popularLoading = false;
+
   constructor(
     private productService: ProductService,
     private cartService: CartService,
@@ -53,6 +57,31 @@ export class ProductList implements OnInit {
   ngOnInit(): void {
     this.fetchProducts();
     this.restoreCartId();
+    this.loadPopularProducts();
+  }
+
+  private loadPopularProducts(): void {
+    this.popularLoading = true;
+    this.recommendationService.getPopular(5).subscribe({
+      next: (products) => {
+        this.popularProducts = products;
+        console.log('✅ Produits populaires reçus du backend:', products);
+        console.log('📊 IDs des produits populaires:', products.map(p => ({ id: p.id, name: p.name })));
+        
+        // Initialiser les quantités par défaut pour les produits populaires
+        this.popularProducts.forEach(product => {
+          if (!this.quantities[product.id]) {
+            this.quantities[product.id] = 1;
+          }
+        });
+        
+        this.popularLoading = false;
+      },
+      error: (err) => {
+        console.error('❌ Erreur lors du chargement des produits populaires', err);
+        this.popularLoading = false;
+      }
+    });
   }
 
   private fetchProducts(): void {

@@ -1,5 +1,35 @@
 <section class="product-list">
-  <h2>Produits</h2>
+  <!-- Section Produits Populaires -->
+  <div class="popular-section" *ngIf="popularProducts.length > 0">
+    <div class="popular-header">
+      <h2>🔥 Produits les Plus Populaires</h2>
+      <p>Les produits les plus commandés par nos clients</p>
+    </div>
+    
+    <div class="popular-grid">
+      <div class="popular-card" *ngFor="let p of popularProducts">
+        <a [routerLink]="['/product', p.id]" class="product-link">
+          <div class="popular-badge">⭐ Populaire</div>
+          <img [src]="p.image" [alt]="p.name" class="image" />
+          <div class="body">
+            <h3 class="name">{{ p.name }}</h3>
+            <div class="category">{{ p.category }}</div>
+            <div class="price">{{ p.price | currency:'DH':'symbol':'1.2-2' }}</div>
+          </div>
+        </a>
+        <div class="actions">
+          <label class="qty-label">Qté
+            <input type="number" min="1" max="99" value="1" [(ngModel)]="quantities[p.id]" (ngModelChange)="updateQuantity(p.id, $event)" placeholder="1" />
+          </label>
+          <button type="button" (click)="addToCart(p)" [disabled]="adding[p.id]" class="add-btn">
+            {{ adding[p.id] ? 'Ajout...' : 'Ajouter' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Tous les Produits</h2>
 
   <!-- Barre de recherche -->
   <div class="search-bar" *ngIf="!loading">
