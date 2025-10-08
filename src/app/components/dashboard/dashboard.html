@@ -17,11 +17,6 @@
     </div>
   </div>
 
-  <!-- Navigation Tabs -->
-  <div class="dashboard-tabs">
-    <button class="tab-btn active" (click)="switchToProducts()">Produits</button>
-    <button class="tab-btn" (click)="switchToOrders()">Commandes</button>
-  </div>
 
   <div class="dashboard-content">
     <div *ngIf="loading" class="status loading">
@@ -111,12 +106,21 @@
   </div>
 </div>
 
-<!-- Order Management Section (Hidden by default) -->
-<div class="order-management-section" *ngIf="showOrders">
-  <app-order-management></app-order-management>
-</div>
-
-<!-- Router outlet for child components -->
-<div class="child-content">
-  <router-outlet></router-outlet>
+<!-- Product Modal -->
+<div class="modal-overlay" *ngIf="showProductModal" (click)="closeProductModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeProductModal()">✕</button>
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Modifier le produit' : 'Ajouter un nouveau produit' }}</h2>
+    </div>
+    <div class="modal-body">
+      <app-add-product 
+        *ngIf="modalProduct"
+        [product]="modalProduct" 
+        [isEditMode]="isEditMode"
+        (productSaved)="onProductSaved()"
+        (cancelled)="closeProductModal()">
+      </app-add-product>
+    </div>
+  </div>
 </div>

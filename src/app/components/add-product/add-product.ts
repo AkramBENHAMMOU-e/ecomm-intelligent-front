@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Product } from '../../models/product.model';
 import { ProductService } from '../../services/product.service';
 
@@ -10,8 +9,8 @@ import { ProductService } from '../../services/product.service';
   styleUrl: './add-product.css'
 })
 export class AddProduct implements OnInit {
-  // Form data
-  product: Product = {
+  // Inputs from parent
+  @Input() product: Product = {
     id: undefined as any,
     name: '',
     description: '',
@@ -20,10 +19,13 @@ export class AddProduct implements OnInit {
     category: '',
     image: ''
   };
+  @Input() isEditMode = false;
+
+  // Outputs to parent
+  @Output() productSaved = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
   // Component state
-  isEditMode = false;
-  loading = false;
   saving = false;
   error: string | null = null;
   success: string | null = null;
@@ -32,34 +34,11 @@ export class AddProduct implements OnInit {
   formErrors: {[key: string]: string} = {};
 
   constructor(
-    private productService: ProductService,
-    private router: Router,
-    private route: ActivatedRoute
+    private productService: ProductService
   ) {}
 
   ngOnInit(): void {
-    // Check if we're in edit mode (product ID in route params)
-    const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      this.isEditMode = true;
-      this.loadProduct(Number(productId));
-    }
-  }
-
-  loadProduct(id: number): void {
-    this.loading = true;
-    this.error = null;
-    this.productService.getProductById(id).subscribe({
-      next: (product) => {
-        this.product = { ...product };
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Failed to load product', err);
-        this.error = 'Produit non trouvé';
-        this.loading = false;
-      }
-    });
+    // No need to load product as it's passed via @Input
   }
 
   validateForm(): boolean {
@@ -147,10 +126,9 @@ export class AddProduct implements OnInit {
         console.log('Product created successfully:', createdProduct);
         this.saving = false;
         this.success = 'Produit créé avec succès!';
-        // Reset form after successful creation
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
-        }, 2000);
+          this.productSaved.emit();
+        }, 1000);
       },
       error: (err) => {
         console.error('Failed to create product', err);
@@ -167,8 +145,8 @@ export class AddProduct implements OnInit {
         this.saving = false;
         this.success = 'Produit mis à jour avec succès!';
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
-        }, 2000);
+          this.productSaved.emit();
+        }, 1000);
       },
       error: (err) => {
         console.error('Failed to update product', err);
@@ -179,28 +157,10 @@ export class AddProduct implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/dashboard']);
+    this.cancelled.emit();
   }
 
   onReset(): void {
-    if (this.isEditMode) {
-      // Reload the original product data
-      const productId = this.route.snapshot.paramMap.get('id');
-      if (productId) {
-        this.loadProduct(Number(productId));
-      }
-    } else {
-      // Reset to empty form
-      this.product = {
-        id: undefined as any,
-        name: '',
-        description: '',
-        price: 0,
-        quantity: 1,
-        category: '',
-        image: ''
-      };
-    }
     this.formErrors = {};
     this.error = null;
     this.success = null;

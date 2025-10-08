@@ -198,8 +198,8 @@ export class ProductList implements OnInit {
               this.cartId = updatedCart.id;
               localStorage.setItem('cartId', String(updatedCart.id));
             }
-            // Open sidebar and refresh cart view
-            this.openCartSidebar();
+            // Ne pas ouvrir le sidebar automatiquement
+            // L'utilisateur peut cliquer sur l'icône panier pour voir le contenu
           }
           this.adding[product.id] = false;
         },

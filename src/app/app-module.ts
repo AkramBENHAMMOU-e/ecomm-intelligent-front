@@ -16,6 +16,7 @@ import { AuthComponent } from './components/auth/auth';
 import { AppHttpInterceptor } from './interceptors/app-http-interceptor';
 import { authenticationGuard } from './guards/authentication-guard';
 import { adminGuard } from './guards/admin-guard';
+import { ChatAssistant } from './components/chat-assistant/chat-assistant';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { adminGuard } from './guards/admin-guard';
     Dashboard,
     AddProduct,
     OrderManagement,
-    AuthComponent
+    AuthComponent,
+    ChatAssistant
   ],
   imports: [
     BrowserModule,

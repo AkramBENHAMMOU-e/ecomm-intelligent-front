@@ -14,8 +14,12 @@ export class Dashboard implements OnInit {
   products: Product[] = [];
   loading = false;
   error: string | null = null;
-  showOrders = false;
   searchTerm: string = '';
+  
+  // Modal state
+  showProductModal = false;
+  modalProduct: Product | null = null;
+  isEditMode = false;
 
   constructor(
     private productService: ProductService,
@@ -44,11 +48,44 @@ export class Dashboard implements OnInit {
   }
 
   navigateToAddProduct(): void {
-    this.router.navigate(['add-product'], { relativeTo: this.router.routerState.root.firstChild });
+    this.openProductModal();
   }
 
   editProduct(productId: number): void {
-    this.router.navigate(['add-product', productId], { relativeTo: this.router.routerState.root.firstChild });
+    const product = this.products.find(p => p.id === productId);
+    if (product) {
+      this.openProductModal(product);
+    }
+  }
+
+  openProductModal(product?: Product): void {
+    if (product) {
+      this.modalProduct = { ...product };
+      this.isEditMode = true;
+    } else {
+      this.modalProduct = {
+        id: undefined as any,
+        name: '',
+        description: '',
+        price: 0,
+        quantity: 1,
+        category: '',
+        image: ''
+      };
+      this.isEditMode = false;
+    }
+    this.showProductModal = true;
+  }
+
+  closeProductModal(): void {
+    this.showProductModal = false;
+    this.modalProduct = null;
+    this.isEditMode = false;
+  }
+
+  onProductSaved(): void {
+    this.closeProductModal();
+    this.loadProducts();
   }
 
   deleteProduct(product: Product): void {
@@ -80,14 +117,6 @@ export class Dashboard implements OnInit {
       const cat = (p.category || '').toLowerCase();
       return name.includes(term) || desc.includes(term) || cat.includes(term);
     });
-  }
-
-  switchToProducts(): void {
-    this.showOrders = false;
-  }
-
-  switchToOrders(): void {
-    this.showOrders = true;
   }
 
   // Method to handle admin logout

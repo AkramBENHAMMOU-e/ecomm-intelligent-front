@@ -18,17 +18,13 @@ const routes: Routes = [
   { 
     path: 'dashboard', 
     component: Dashboard,
-    canActivate: [adminGuard],
-    children: [
-      { path: 'orders', component: OrderManagement },
-      { path: 'add-product', component: AddProduct },
-      { path: 'add-product/:id', component: AddProduct }
-    ]
+    canActivate: [adminGuard]
   },
-  // Redirect old paths to new nested structure
-  { path: 'add-product', redirectTo: 'dashboard/add-product' },
-  { path: 'add-product/:id', redirectTo: 'dashboard/add-product/:id' },
-  { path: 'orders', redirectTo: 'dashboard/orders' }
+  {
+    path: 'orders',
+    component: OrderManagement,
+    canActivate: [adminGuard]
+  }
 ];
 
 @NgModule({

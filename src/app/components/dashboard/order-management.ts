@@ -17,6 +17,9 @@ export class OrderManagement implements OnInit {
   editingOrderId: number | null = null;
   // Add a property to store the new status when editing
   newStatus: StatusOrder = 'Processing';
+  // Modal state for order details
+  showOrderDetailsModal = false;
+  selectedOrder: Order | null = null;
 
   constructor(
     private orderService: OrderService,
@@ -69,13 +72,13 @@ export class OrderManagement implements OnInit {
   }
 
   viewOrder(order: Order): void {
-    // For now, we'll just show an alert with order details
-    // In a more complete implementation, this would navigate to an order details page
-    alert(`Commande #${order.id}
-Statut: ${order.status}
-Date: ${order.date}
-Total: ${this.getOrderTotal(order)} DH
-Articles: ${order.items.length}`);
+    this.selectedOrder = order;
+    this.showOrderDetailsModal = true;
+  }
+
+  closeOrderDetailsModal(): void {
+    this.showOrderDetailsModal = false;
+    this.selectedOrder = null;
   }
 
   // Method to start editing an order's status

@@ -103,3 +103,68 @@
     </div>
   </div>
 </div>
+
+<!-- Order Details Modal -->
+<div class="modal-overlay" *ngIf="showOrderDetailsModal" (click)="closeOrderDetailsModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeOrderDetailsModal()">✕</button>
+    
+    <div class="modal-header">
+      <h2>Détails de la Commande #{{ selectedOrder?.id }}</h2>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedOrder">
+      <!-- Order Info -->
+      <div class="order-info-section">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Date de commande:</span>
+            <span class="info-value">{{ selectedOrder.date | date:'dd/MM/yyyy à HH:mm' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Statut:</span>
+            <span class="status-badge" [ngClass]="getStatusClass(selectedOrder.status)">
+              {{ selectedOrder.status }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Nombre d'articles:</span>
+            <span class="info-value">{{ selectedOrder.items.length }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Quantité totale:</span>
+            <span class="info-value">{{ getOrderQuantity(selectedOrder) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products List -->
+      <div class="products-section">
+        <h3>Produits Commandés</h3>
+        <div class="products-list">
+          <div class="product-item" *ngFor="let item of selectedOrder.items">
+            <div class="product-info">
+              <div class="product-name">{{ item.product.name }}</div>
+              <div class="product-category">{{ item.product.category }}</div>
+            </div>
+            <div class="product-details">
+              <div class="product-quantity">Qté: {{ item.quantity }}</div>
+              <div class="product-price">{{ item.price | currency:'DH':'symbol':'1.2-2' }}</div>
+              <div class="product-subtotal">
+                <strong>{{ (item.price * item.quantity) | currency:'DH':'symbol':'1.2-2' }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Total -->
+      <div class="order-total-section">
+        <div class="total-row">
+          <span class="total-label">Total de la Commande:</span>
+          <span class="total-amount">{{ getOrderTotal(selectedOrder) | currency:'DH':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
