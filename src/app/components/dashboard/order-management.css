@@ -141,6 +141,12 @@
   color: #383d41;
 }
 
+.phone-cell {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #666;
+}
+
 .total {
   font-weight: 600;
 }

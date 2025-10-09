@@ -5,8 +5,12 @@
     <section class="customer">
       <h3>Vos informations</h3>
       <div class="field">
-        <label for="name">Nom complet</label>
-        <input id="name" type="text" [(ngModel)]="name" placeholder="Votre nom" />
+        <label for="firstName">Prénom</label>
+        <input id="firstName" type="text" [(ngModel)]="firstName" placeholder="Votre prénom" />
+      </div>
+      <div class="field">
+        <label for="lastName">Nom</label>
+        <input id="lastName" type="text" [(ngModel)]="lastName" placeholder="Votre nom" />
       </div>
       <div class="field">
         <label for="email">Email</label>
@@ -15,6 +19,10 @@
       <div class="field">
         <label for="address">Adresse</label>
         <textarea id="address" rows="3" [(ngModel)]="address" placeholder="Votre adresse de livraison"></textarea>
+      </div>
+      <div class="field">
+        <label for="phone">Téléphone</label>
+        <input id="phone" type="tel" [(ngModel)]="phoneNumber" placeholder="Votre numéro de téléphone" />
       </div>
     </section>
 
@@ -32,6 +40,14 @@
   <div class="order" *ngIf="order">
     <h3>Commande créée</h3>
     <p><strong>N°:</strong> {{ order.id }} | <strong>Date:</strong> {{ order.date }} | <strong>Statut:</strong> {{ order.status }}</p>
+    
+    <div class="customer-info" *ngIf="order.customer">
+      <h4>Informations du client</h4>
+      <p><strong>Nom:</strong> {{ order.customer.firstName }} {{ order.customer.lastName }}</p>
+      <p *ngIf="order.customer.email"><strong>Email:</strong> {{ order.customer.email }}</p>
+      <p *ngIf="order.customer.phone"><strong>Téléphone:</strong> {{ order.customer.phone }}</p>
+      <p *ngIf="order.customer.address"><strong>Adresse:</strong> {{ order.customer.address }}</p>
+    </div>
 
     <table class="items">
       <thead>

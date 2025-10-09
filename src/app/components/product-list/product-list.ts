@@ -5,7 +5,7 @@ import { CartService } from '../../services/cart.service';
 import { Cart, CartItem } from '../../models/cart.model';
 import { OrderService } from '../../services/order.service';
 import { RecommendationService } from '../../services/recommendation.service';
-import { Order } from '../../models/order.model';
+import { Order, CheckoutRequest } from '../../models/order.model';
 
 @Component({
   selector: 'app-product-list',
@@ -330,7 +330,15 @@ export class ProductList implements OnInit {
       // add selected item then checkout
       this.cartService.addItemToCart(cid, { productId: product.id, quantity }).subscribe({
         next: () => {
-          this.orderService.checkout(cid).subscribe({
+          const checkoutRequest: CheckoutRequest = {
+            cartId: cid,
+            firstName: 'Client',
+            lastName: 'Express',
+            email: '',
+            phone: '',
+            address: ''
+          };
+          this.orderService.checkout(checkoutRequest).subscribe({
             next: (ord) => {
               this.lastOrder = ord;
               this.placing = false;

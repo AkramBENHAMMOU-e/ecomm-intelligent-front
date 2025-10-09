@@ -7,6 +7,9 @@
 .form-row input { width: 220px; padding: 8px; }
 .primary { background: #0d6efd; color: #fff; border: none; padding: 10px 12px; border-radius: 6px; cursor: pointer; }
 .error { color: #b00020; margin: 8px 0; }
+.customer-info { background: #e8f5e8; padding: 12px; border-radius: 6px; margin: 12px 0; border-left: 4px solid #28a745; }
+.customer-info h4 { margin: 0 0 8px 0; color: #155724; }
+.customer-info p { margin: 4px 0; color: #155724; }
 .items { width: 100%; border-collapse: collapse; margin-top: 12px; }
 .items th, .items td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
 .items .right { text-align: right; }

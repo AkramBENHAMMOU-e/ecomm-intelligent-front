@@ -123,4 +123,17 @@ export class Dashboard implements OnInit {
   logout(): void {
     this.authService.logout();
   }
+
+  // Navigation methods
+  navigateToOrders(): void {
+    this.router.navigate(['/orders']);
+  }
+
+  navigateToCustomers(): void {
+    this.router.navigate(['/customers']);
+  }
+
+  showProductsSection(): void {
+    // Already on products section, no action needed
+  }
 }

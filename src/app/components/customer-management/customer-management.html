@@ -1,0 +1,110 @@
+<div class="customer-management">
+  <div class="header">
+    <h2>Gestion des Clients</h2>
+    <div class="stats">
+      <span class="stat">Total: {{ customers.length }} clients</span>
+      <span class="stat">Affichés: {{ filteredCustomers.length }}</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search-section">
+      <input 
+        type="text" 
+        placeholder="Rechercher par nom, email ou téléphone..." 
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        class="search-input"
+      />
+    </div>
+    
+    <div class="sort-section">
+      <label>Trier par:</label>
+      <select [(ngModel)]="sortBy" (change)="onSortChange(sortBy)">
+        <option value="firstName">Prénom</option>
+        <option value="lastName">Nom</option>
+        <option value="email">Email</option>
+        <option value="phone">Téléphone</option>
+      </select>
+      <button (click)="onSortChange(sortBy)" class="sort-btn">
+        {{ getSortIcon(sortBy) }}
+      </button>
+    </div>
+  </div>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+  
+  <div class="loading" *ngIf="loading">
+    <p>Chargement des clients...</p>
+  </div>
+
+  <div class="customers-table" *ngIf="!loading && filteredCustomers.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th (click)="onSortChange('firstName')" class="sortable">
+            Prénom {{ getSortIcon('firstName') }}
+          </th>
+          <th (click)="onSortChange('lastName')" class="sortable">
+            Nom {{ getSortIcon('lastName') }}
+          </th>
+          <th (click)="onSortChange('email')" class="sortable">
+            Email {{ getSortIcon('email') }}
+          </th>
+          <th (click)="onSortChange('phone')" class="sortable">
+            Téléphone {{ getSortIcon('phone') }}
+          </th>
+          <th>Adresse</th>
+          <th>Commandes</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let customer of filteredCustomers">
+          <td>{{ customer.firstName }}</td>
+          <td>{{ customer.lastName }}</td>
+          <td>
+            <a [href]="'mailto:' + customer.email" *ngIf="customer.email">
+              {{ customer.email }}
+            </a>
+            <span *ngIf="!customer.email" class="no-data">Non renseigné</span>
+          </td>
+          <td>
+            <a [href]="'tel:' + customer.phone" *ngIf="customer.phone">
+              {{ customer.phone }}
+            </a>
+            <span *ngIf="!customer.phone" class="no-data">Non renseigné</span>
+          </td>
+          <td>
+            <span *ngIf="customer.address; else noAddress">{{ customer.address }}</span>
+            <ng-template #noAddress>
+              <span class="no-data">Non renseignée</span>
+            </ng-template>
+          </td>
+          <td>
+            <span class="orders-count">{{ getCustomerOrdersCount(customer) }}</span>
+          </td>
+          <td>
+            <button class="btn-view" (click)="viewCustomerDetails(customer)">
+              Voir détails
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="no-results" *ngIf="!loading && filteredCustomers.length === 0">
+    <div *ngIf="customers.length === 0; else noSearchResults">
+      <h3>Aucun client trouvé</h3>
+      <p>Il n'y a pas encore de clients dans le système.</p>
+    </div>
+    <ng-template #noSearchResults>
+      <h3>Aucun résultat</h3>
+      <p>Aucun client ne correspond à votre recherche "{{ searchTerm }}"</p>
+      <button (click)="searchTerm = ''; onSearchChange()" class="btn-clear">
+        Effacer la recherche
+      </button>
+    </ng-template>
+  </div>
+</div>

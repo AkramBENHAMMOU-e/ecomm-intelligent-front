@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Order, StatusOrder } from '../models/order.model';
+import { Order, StatusOrder, CheckoutRequest } from '../models/order.model';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -34,8 +34,7 @@ export class OrderService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  checkout(cartId: number): Observable<Order> {
-    const params = new HttpParams().set('cartId', String(cartId));
-    return this.http.post<Order>(`${this.baseUrl}/checkout`, null, { params });
+  checkout(request: CheckoutRequest): Observable<Order> {
+    return this.http.post<Order>(`${this.baseUrl}/checkout`, request);
   }
 }

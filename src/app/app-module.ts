@@ -12,6 +12,7 @@ import { CheckoutComponent } from './components/checkout/checkout';
 import { Dashboard } from './components/dashboard/dashboard';
 import { AddProduct } from './components/add-product/add-product';
 import { OrderManagement } from './components/dashboard/order-management';
+import { CustomerManagementComponent } from './components/customer-management/customer-management';
 import { AuthComponent } from './components/auth/auth';
 import { AppHttpInterceptor } from './interceptors/app-http-interceptor';
 import { authenticationGuard } from './guards/authentication-guard';
@@ -27,6 +28,7 @@ import { ChatAssistant } from './components/chat-assistant/chat-assistant';
     Dashboard,
     AddProduct,
     OrderManagement,
+    CustomerManagementComponent,
     AuthComponent,
     ChatAssistant
   ],

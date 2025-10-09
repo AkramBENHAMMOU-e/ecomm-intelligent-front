@@ -6,6 +6,7 @@ import { CheckoutComponent } from './components/checkout/checkout';
 import { Dashboard } from './components/dashboard/dashboard';
 import { AddProduct } from './components/add-product/add-product';
 import { OrderManagement } from './components/dashboard/order-management';
+import { CustomerManagementComponent } from './components/customer-management/customer-management';
 import { AuthComponent } from './components/auth/auth';
 import { authenticationGuard } from './guards/authentication-guard';
 import { adminGuard } from './guards/admin-guard';
@@ -23,6 +24,11 @@ const routes: Routes = [
   {
     path: 'orders',
     component: OrderManagement,
+    canActivate: [adminGuard]
+  },
+  {
+    path: 'customers',
+    component: CustomerManagementComponent,
     canActivate: [adminGuard]
   }
 ];

@@ -38,6 +38,7 @@
               <th>ID</th>
               <th>Date</th>
               <th>Statut</th>
+              <th>Téléphone</th>
               <th>Articles</th>
               <th>Quantité</th>
               <th>Total</th>
@@ -63,6 +64,9 @@
                     <option value="Completed">Completed</option>
                   </select>
                 </ng-template>
+              </td>
+              <td class="phone-cell">
+                <span>{{ order.phoneNumber || 'N/A' }}</span>
               </td>
               <td class="items-cell">
                 <span>{{ order.items.length }} article(s)</span>
@@ -134,6 +138,10 @@
           <div class="info-item">
             <span class="info-label">Quantité totale:</span>
             <span class="info-value">{{ getOrderQuantity(selectedOrder) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedOrder.phoneNumber">
+            <span class="info-label">Téléphone:</span>
+            <span class="info-value">{{ selectedOrder.phoneNumber }}</span>
           </div>
         </div>
       </div>

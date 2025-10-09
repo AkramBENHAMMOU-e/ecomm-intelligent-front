@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Order } from '../../models/order.model';
+import { Order, CheckoutRequest } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 
 @Component({
@@ -14,10 +14,12 @@ export class CheckoutComponent {
   error: string | null = null;
   order: Order | null = null;
 
-  // Simple customer info (stored locally for UX only)
-  name: string = '';
+  // Customer info (stored locally for UX only)
+  firstName: string = '';
+  lastName: string = '';
   email: string = '';
   address: string = '';
+  phoneNumber: string = '';
 
   constructor(private orderService: OrderService) {
     const saved = localStorage.getItem('cartId');
@@ -27,9 +29,11 @@ export class CheckoutComponent {
     if (info) {
       try {
         const parsed = JSON.parse(info);
-        this.name = parsed.name || '';
+        this.firstName = parsed.firstName || '';
+        this.lastName = parsed.lastName || '';
         this.email = parsed.email || '';
         this.address = parsed.address || '';
+        this.phoneNumber = parsed.phoneNumber || '';
       } catch {}
     }
   }
@@ -43,11 +47,27 @@ export class CheckoutComponent {
       return;
     }
 
-    // Persist the info locally (backend might not accept it yet)
-    localStorage.setItem('checkoutInfo', JSON.stringify({ name: this.name, email: this.email, address: this.address }));
+    // Persist the info locally
+    localStorage.setItem('checkoutInfo', JSON.stringify({ 
+      firstName: this.firstName, 
+      lastName: this.lastName,
+      email: this.email, 
+      address: this.address, 
+      phoneNumber: this.phoneNumber 
+    }));
+
+    // Create checkout request
+    const checkoutRequest: CheckoutRequest = {
+      cartId: id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      phone: this.phoneNumber,
+      address: this.address
+    };
 
     this.loading = true;
-    this.orderService.checkout(id).subscribe({
+    this.orderService.checkout(checkoutRequest).subscribe({
       next: (ord) => {
         this.order = ord;
         this.loading = false;

@@ -1,6 +1,6 @@
 <div class="dashboard">
   <div class="dashboard-header">
-    <h1>Tableau de bord - Gestion des produits</h1>
+    <h1>Tableau de bord - Administration</h1>
     <div class="header-actions">
       <button type="button" class="btn-primary" (click)="navigateToAddProduct()">
         <span class="icon">+</span>
@@ -15,6 +15,24 @@
         Déconnexion
       </button>
     </div>
+  </div>
+
+  <!-- Navigation Admin -->
+  <div class="admin-nav">
+    <nav class="nav-tabs">
+      <button class="nav-tab active" (click)="showProductsSection()">
+        <span class="icon">📦</span>
+        Produits
+      </button>
+      <button class="nav-tab" (click)="navigateToOrders()">
+        <span class="icon">📋</span>
+        Commandes
+      </button>
+      <button class="nav-tab" (click)="navigateToCustomers()">
+        <span class="icon">👥</span>
+        Clients
+      </button>
+    </nav>
   </div>
 
 
