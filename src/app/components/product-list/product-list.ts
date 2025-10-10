@@ -55,7 +55,7 @@ export class ProductList implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.fetchProducts();
+    this.loadProductsWithCache();
     this.restoreCartId();
     this.loadPopularProducts();
   }
@@ -84,18 +84,52 @@ export class ProductList implements OnInit {
     });
   }
 
+  private loadProductsWithCache(): void {
+    // Vérifier d'abord si on a des produits en cache
+    const cachedProducts = this.productService.getCachedProducts();
+    if (cachedProducts.length > 0) {
+      console.log('📦 Utilisation du cache des produits');
+      this.products = cachedProducts;
+      this.initializeQuantities();
+      return;
+    }
+    
+    // Sinon, charger depuis le serveur
+    this.fetchProducts();
+  }
+
+  private initializeQuantities(): void {
+    // Initialize default quantities for all products
+    this.products.forEach(product => {
+      if (!this.quantities[product.id]) {
+        this.quantities[product.id] = 1;
+      }
+    });
+  }
+  
+  // Méthode publique pour forcer le rechargement
+  refreshProducts(): void {
+    console.log('🔄 Rechargement forcé des produits');
+    this.productService.refreshProducts().subscribe({
+      next: (data) => {
+        this.products = data ?? [];
+        this.initializeQuantities();
+        console.log('✅ Produits rechargés depuis le serveur');
+      },
+      error: (err) => {
+        console.error('Erreur lors du rechargement:', err);
+        this.error = 'Erreur lors du rechargement des produits';
+      }
+    });
+  }
+
   private fetchProducts(): void {
     this.loading = true;
     this.error = null;
     this.productService.getProducts().subscribe({
       next: (data) => {
         this.products = data ?? [];
-        // Initialize default quantities for all products
-        this.products.forEach(product => {
-          if (!this.quantities[product.id]) {
-            this.quantities[product.id] = 1;
-          }
-        });
+        this.initializeQuantities();
         this.loading = false;
       },
       error: (err) => {

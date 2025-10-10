@@ -29,7 +29,18 @@
     </div>
   </div>
 
-  <h2>Tous les Produits</h2>
+  <div class="products-header">
+    <h2>Tous les Produits</h2>
+    <button 
+      type="button" 
+      (click)="refreshProducts()" 
+      [disabled]="loading"
+      class="refresh-btn"
+      title="Actualiser les produits">
+      <span class="refresh-icon" [class.spinning]="loading">🔄</span>
+      {{ loading ? 'Chargement...' : 'Actualiser' }}
+    </button>
+  </div>
 
   <!-- Barre de recherche -->
   <div class="search-bar" *ngIf="!loading">
