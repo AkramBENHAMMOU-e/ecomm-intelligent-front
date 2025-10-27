@@ -21,13 +21,15 @@ export class AppHttpInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
 
-    // Don't add auth header to truly public API endpoints only
-    // - GET /api/products/** is public
-    // - Cart and checkout endpoints are public for customers
-    const isPublicGetProducts = req.method === 'GET' && req.url.includes('/api/products');
+    // Public endpoints: do NOT attach Authorization (avoids 401 when a stale token exists)
+    const isGet = req.method === 'GET';
+    const isOptions = req.method === 'OPTIONS';
+    const isPublicProducts = isGet && req.url.includes('/api/products');
+    const isPublicReviews = isGet && req.url.includes('/api/reviews');
+    const isPublicRecommendations = isGet && req.url.includes('/api/recommendations');
     const isPublicCartOrCheckout = req.url.includes('/api/carts') || req.url.includes('/api/orders/checkout');
 
-    if (isPublicGetProducts || isPublicCartOrCheckout) {
+    if (isOptions || isPublicProducts || isPublicReviews || isPublicRecommendations || isPublicCartOrCheckout) {
       console.log('Interceptor - Public endpoint, skipping auth header');
       return next.handle(req);
     }

@@ -1,77 +1,161 @@
 <div class="checkout">
-  <h2>Passer la commande</h2>
+  <div class="checkout-header">
+    <h2>Passer la commande</h2>
+    <p>Finalisez votre commande en quelques étapes simples</p>
+  </div>
 
-  <div class="grid-2">
-    <section class="customer">
-      <h3>Vos informations</h3>
-      <div class="field">
-        <label for="firstName">Prénom</label>
-        <input id="firstName" type="text" [(ngModel)]="firstName" placeholder="Votre prénom" />
+  <div class="checkout-grid">
+    <!-- Formulaire client -->
+    <section class="customer-section">
+      <div class="section-header">
+        <h3>Informations de livraison</h3>
+        <p>Renseignez vos coordonnées</p>
       </div>
-      <div class="field">
-        <label for="lastName">Nom</label>
-        <input id="lastName" type="text" [(ngModel)]="lastName" placeholder="Votre nom" />
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="firstName" class="form-label">Prénom</label>
+          <input id="firstName" type="text" class="form-input" [(ngModel)]="firstName" placeholder="Votre prénom" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="lastName" class="form-label">Nom</label>
+          <input id="lastName" type="text" class="form-input" [(ngModel)]="lastName" placeholder="Votre nom" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input id="email" type="email" class="form-input" [(ngModel)]="email" placeholder="votre@email.com" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="phone" class="form-label">Téléphone</label>
+          <input id="phone" type="tel" class="form-input" [(ngModel)]="phoneNumber" placeholder="0123456789" required />
+        </div>
+        
+        <div class="form-group full-width">
+          <label for="address" class="form-label">Adresse de livraison</label>
+          <textarea id="address" rows="3" class="form-input" [(ngModel)]="address" placeholder="Votre adresse complète" required></textarea>
+        </div>
       </div>
-      <div class="field">
-        <label for="email">Email</label>
-        <input id="email" type="email" [(ngModel)]="email" placeholder="Votre email" />
+
+      <div class="action-buttons">
+        <button (click)="placeOrder()" [disabled]="loading || !cart?.items?.length" class="btn-primary btn-lg">
+          <span *ngIf="loading" class="btn-loading"></span>
+          {{ loading ? 'Traitement en cours...' : 'Valider la commande' }}
+        </button>
       </div>
-      <div class="field">
-        <label for="address">Adresse</label>
-        <textarea id="address" rows="3" [(ngModel)]="address" placeholder="Votre adresse de livraison"></textarea>
-      </div>
-      <div class="field">
-        <label for="phone">Téléphone</label>
-        <input id="phone" type="tel" [(ngModel)]="phoneNumber" placeholder="Votre numéro de téléphone" />
+      
+      <div class="form-error" *ngIf="error">
+        {{ error }}
       </div>
     </section>
 
-    <section class="confirm">
-      <h3>Validation</h3>
-      <div class="form-row">
-        <label for="cartId">ID du panier</label>
-        <input id="cartId" type="number" [(ngModel)]="cartIdInput" placeholder="Entrez l'ID du panier" />
+    <!-- Résumé de la commande -->
+    <section class="order-summary-side">
+      <div class="summary-header">
+        <h3>Résumé</h3>
       </div>
-      <button (click)="placeOrder()" [disabled]="loading" class="primary">{{ loading ? 'Traitement...' : 'Valider la commande' }}</button>
-      <p class="error" *ngIf="error">{{ error }}</p>
+
+      <div class="cart-items-list">
+        <div *ngFor="let item of cart?.items" class="cart-item">
+          <div class="item-image">
+            <img [src]="item.product.image" [alt]="item.product.name" />
+          </div>
+          <div class="item-details">
+            <div class="item-name">{{ item.product.name }}</div>
+            <div class="item-quantity">Quantité: {{ item.quantity }}</div>
+            <div class="item-price">{{ (item.product.price * item.quantity) | currency:'DH':'symbol':'1.2-2' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-total">
+        <div class="total-line">
+          <span class="total-label">Total</span>
+          <span class="total-amount">{{ totalPrice | currency:'DH':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
     </section>
   </div>
 
-  <div class="order" *ngIf="order">
-    <h3>Commande créée</h3>
-    <p><strong>N°:</strong> {{ order.id }} | <strong>Date:</strong> {{ order.date }} | <strong>Statut:</strong> {{ order.status }}</p>
+  <!-- Email Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showEmailConfirm" (click)="cancelOrder()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Confirmation de commande</h3>
+        <button class="modal-close" (click)="cancelOrder()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Un email de confirmation sera envoyé à:</p>
+        <p class="email-highlight">{{ email }}</p>
+        <p>Confirmez-vous cette commande?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="cancelOrder()">Annuler</button>
+        <button class="btn-primary" (click)="confirmOrder()">Confirmer la commande</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="order-summary" *ngIf="order">
+    <div class="summary-header">
+      <h3>🎉 Commande créée avec succès !</h3>
+      <div class="order-badge">
+        <span class="order-id">#{{ order.id }}</span>
+        <span class="order-date">{{ order.date }}</span>
+        <span class="order-status">{{ order.status }}</span>
+      </div>
+    </div>
     
-    <div class="customer-info" *ngIf="order.customer">
-      <h4>Informations du client</h4>
-      <p><strong>Nom:</strong> {{ order.customer.firstName }} {{ order.customer.lastName }}</p>
-      <p *ngIf="order.customer.email"><strong>Email:</strong> {{ order.customer.email }}</p>
-      <p *ngIf="order.customer.phone"><strong>Téléphone:</strong> {{ order.customer.phone }}</p>
-      <p *ngIf="order.customer.address"><strong>Adresse:</strong> {{ order.customer.address }}</p>
+    <div class="customer-info-card" *ngIf="order.customer">
+      <h4>👤 Informations du client</h4>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Nom complet</span>
+          <span class="info-value">{{ order.customer.firstName }} {{ order.customer.lastName }}</span>
+        </div>
+        <div class="info-item" *ngIf="order.customer.email">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ order.customer.email }}</span>
+        </div>
+        <div class="info-item" *ngIf="order.customer.phone">
+          <span class="info-label">Téléphone</span>
+          <span class="info-value">{{ order.customer.phone }}</span>
+        </div>
+        <div class="info-item" *ngIf="order.customer.address">
+          <span class="info-label">Adresse</span>
+          <span class="info-value">{{ order.customer.address }}</span>
+        </div>
+      </div>
     </div>
 
-    <table class="items">
-      <thead>
-        <tr>
-          <th>Produit</th>
-          <th>Prix</th>
-          <th>Quantité</th>
-          <th>Sous-total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let it of order.items">
-          <td>{{ it.product.name }}</td>
-          <td>{{ it.price | number:'1.2-2' }} €</td>
-          <td>{{ it.quantity }}</td>
-          <td>{{ (it.price * it.quantity) | number:'1.2-2' }} €</td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="3" class="right"><strong>Total</strong></td>
-          <td><strong>{{ totalAmount | number:'1.2-2' }} €</strong></td>
-        </tr>
-      </tfoot>
-    </table>
+    <div class="items-table-container">
+      <h4>📦 Articles commandés</h4>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Prix unitaire</th>
+            <th>Quantité</th>
+            <th>Sous-total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let it of order.items">
+            <td class="product-name">{{ it.product.name }}</td>
+            <td class="price">{{ it.price | currency:'DH':'symbol':'1.2-2' }}</td>
+            <td class="quantity">{{ it.quantity }}</td>
+            <td class="subtotal">{{ (it.price * it.quantity) | currency:'DH':'symbol':'1.2-2' }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="3" class="total-label">💰 Total de la commande</td>
+            <td class="total-amount">{{ totalAmount | currency:'DH':'symbol':'1.2-2' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   </div>
 </div>

@@ -104,17 +104,36 @@
 
       <!-- Product Description -->
       <div class="form-group full-width">
-        <label for="description">Description</label>
-        <textarea 
-          id="description" 
-          [(ngModel)]="product.description" 
-          name="description"
-          class="form-control"
-          [class.error]="formErrors['description']"
-          placeholder="Décrivez le produit en détail..."
-          rows="4"
-          maxlength="500"
-        ></textarea>
+        <label for="description">
+          Description
+        </label>
+        <div class="description-container">
+          <textarea 
+            id="description" 
+            [(ngModel)]="product.description" 
+            name="description"
+            class="form-control"
+            [class.error]="formErrors['description']"
+            placeholder="Décrivez le produit en détail ou utilisez le bouton 'Générer' pour une description automatique..."
+            rows="4"
+            maxlength="500"
+          ></textarea>
+          <button 
+            type="button" 
+            class="btn-generate-description"
+            (click)="generateDescription()"
+            [disabled]="generatingDescription || !product.name.trim() || !product.category?.trim() || !product.price"
+            title="Générer une description automatique avec l'IA basée sur les informations du produit"
+          >
+            <span *ngIf="generatingDescription" class="spinner-small"></span>
+            <svg *ngIf="!generatingDescription" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            {{ generatingDescription ? 'Génération...' : 'Générer avec l\'IA' }}
+          </button>
+        </div>
         <div class="char-count">{{ (product.description.length || 0) }}/500 caractères</div>
         <div *ngIf="formErrors['description']" class="error-message">{{ formErrors['description'] }}</div>
       </div>

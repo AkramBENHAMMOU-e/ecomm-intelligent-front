@@ -1,78 +1,252 @@
 <div class="product-detail-container" *ngIf="!loading && product">
+  <!-- Bouton retour -->
   <button class="back-button" (click)="goBack()">
     <span>←</span> Retour aux produits
   </button>
 
-  <div class="product-detail">
-    <div class="product-image-section">
-      <img [src]="product.image" [alt]="product.name" class="product-image" />
-    </div>
-
-    <div class="product-info-section">
-      <div class="product-header">
-        <h1 class="product-title">{{ product.name }}</h1>
-        <span class="product-category">{{ product.category }}</span>
+  <!-- Section principale du produit -->
+  <section class="product-main-section">
+    <div class="product-layout">
+      <!-- Image du produit (gauche) -->
+      <div class="product-image-container">
+        <img [src]="product.image" [alt]="product.name" class="product-image" />
       </div>
 
-      <div class="product-price">
-        {{ product.price | currency:'DH':'symbol':'1.2-2' }}
-      </div>
+      <!-- Détails du produit (droite) -->
+      <div class="product-details">
+        <div class="product-header">
+          <h1 class="product-title">{{ product.name }}</h1>
+          <span class="product-category">{{ product.category }}</span>
+        </div>
 
-      <div class="product-description">
-        <h3>Description</h3>
-        <p>{{ product.description }}</p>
-      </div>
+        <!-- Étoiles d'évaluation -->
+        <div class="product-rating-section">
+          <div class="rating-display">
+            <div class="stars">
+              <span *ngFor="let star of [1,2,3,4,5]" 
+                    [class]="star <= getProductRating() ? 'star filled' : 'star empty'">
+                ★
+              </span>
+            </div>
+            <span class="rating-value">{{ getProductRating().toFixed(1) }}</span>
+            <span class="rating-description">({{ getRatingDescription(getProductRating()) }})</span>
+          </div>
+          <span class="rating-count">{{ getReviewCount() }} avis</span>
+        </div>
 
-      <div class="product-stock" *ngIf="product.quantity > 0">
-        <span class="stock-available">✓ En stock ({{ product.quantity }} disponibles)</span>
-      </div>
-      <div class="product-stock out-of-stock" *ngIf="product.quantity === 0">
-        <span>✗ Rupture de stock</span>
-      </div>
+        <!-- Prix du produit -->
+        <div class="product-price-section">
+          <span class="price-label">Prix</span>
+          <span class="product-price">{{ product.price | currency:'DH':'symbol':'1.2-2' }}</span>
+        </div>
 
-      <div class="product-actions">
-        <div class="quantity-selector">
-          <label>Quantité:</label>
-          <div class="quantity-controls">
-            <button class="qty-btn" (click)="decreaseQuantity()">-</button>
-            <input type="number" min="1" [(ngModel)]="quantity" class="qty-input" />
-            <button class="qty-btn" (click)="increaseQuantity()">+</button>
+        <!-- Description -->
+        <div class="product-description-section">
+          <h3>Description</h3>
+          <p>{{ product.description }}</p>
+        </div>
+
+        <!-- Informations supplémentaires -->
+        <div class="product-info-grid">
+          <div class="info-item">
+            <span class="info-label">Origine</span>
+            <span class="info-value">{{ product.origin }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Marque</span>
+            <span class="info-value">{{ product.brand }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Torréfaction</span>
+            <span class="info-value">{{ product.roastLevel }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Stock</span>
+            <span class="info-value" [class.in-stock]="product.quantity > 0" [class.out-of-stock]="product.quantity === 0">
+              {{ product.quantity > 0 ? product.quantity + ' disponibles' : 'Rupture de stock' }}
+            </span>
           </div>
         </div>
 
-        <button 
-          class="add-to-cart-btn" 
-          (click)="addToCart()" 
-          [disabled]="adding || product.quantity === 0"
-        >
-          {{ adding ? 'Ajout en cours...' : 'Ajouter au panier' }}
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section des produits recommandés -->
-  <div class="recommendations-section" *ngIf="recommendedProducts.length > 0">
-    <h2 class="recommendations-title">Produits similaires</h2>
-    <div class="recommendations-grid">
-      <div class="recommendation-card" *ngFor="let rec of recommendedProducts" (click)="goToProduct(rec.id)">
-        <img [src]="rec.image" [alt]="rec.name" class="rec-image" />
-        <div class="rec-body">
-          <h4 class="rec-name">{{ rec.name }}</h4>
-          <p class="rec-category">{{ rec.category }}</p>
-          <p class="rec-price">{{ rec.price | currency:'DH':'symbol':'1.2-2' }}</p>
+        <!-- Bouton d'achat -->
+        <div class="purchase-section">
+          <div class="quantity-selector">
+            <label for="quantity">Quantité</label>
+            <div class="quantity-controls">
+              <button type="button" (click)="decreaseQuantity()" [disabled]="quantity <= 1">-</button>
+              <input type="number" id="quantity" [(ngModel)]="quantity" min="1" [max]="product.quantity">
+              <button type="button" (click)="increaseQuantity()" [disabled]="quantity >= product.quantity">+</button>
+            </div>
+          </div>
+          
+          <button class="purchase-button" 
+                  (click)="addToCart()" 
+                  [disabled]="adding || product.quantity === 0"
+                  [class.disabled]="product.quantity === 0">
+            <span *ngIf="!adding">🛒 J'achète</span>
+            <span *ngIf="adding">Ajout en cours...</span>
+          </button>
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- Section recommandations -->
+  <section class="recommendations-section" *ngIf="recommendedProducts.length > 0">
+    <div class="section-header">
+      <h2>Les clients ayant consulté cet article ont également regardé</h2>
+    </div>
+    
+    <div class="carousel-container">
+      <button class="carousel-btn prev" (click)="previousCarousel()" *ngIf="recommendedProducts.length > 3">
+        ←
+      </button>
+      <div class="recommendations-grid">
+        <div class="recommendation-card" *ngFor="let recProduct of getCarouselProducts()">
+        <div class="card-image">
+          <img [src]="recProduct.image" [alt]="recProduct.name" />
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">{{ recProduct.name }}</h3>
+          <div class="card-rating" *ngIf="getRecommendationRating(recProduct)">
+            <div class="stars">
+              <span *ngFor="let star of [1,2,3,4,5]" 
+                    [class]="star <= getRecommendationRating(recProduct)! ? 'star filled' : 'star empty'">
+                ★
+              </span>
+            </div>
+            <span class="rating-value">{{ getRecommendationRating(recProduct)!.toFixed(1) }}</span>
+          </div>
+          <div class="card-price">{{ recProduct.price | currency:'DH':'symbol':'1.2-2' }}</div>
+          <button class="view-button" (click)="goToProduct(recProduct.id)">
+            Voir
+          </button>
+        </div>
+      </div>
+    </div>
+      <button class="carousel-btn next" (click)="nextCarousel()" *ngIf="recommendedProducts.length > 3">
+        →
+      </button>
+    </div>
+  </section>
+
+  <!-- Section commentaires -->
+  <section class="comments-section">
+    <div class="section-header">
+      <h2>Avis clients</h2>
+    </div>
+    
+    <!-- Zone d'ajout de commentaire -->
+    <div class="add-comment-section">
+      <h3 (click)="toggleCommentForm()" class="toggle-title">
+        📝 Partagez votre expérience
+        <span class="toggle-icon">{{ showCommentForm ? '−' : '+' }}</span>
+      </h3>
+      <div class="comment-form" *ngIf="showCommentForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="customerName">Votre nom *</label>
+            <input type="text" id="customerName" [(ngModel)]="newComment.customerName" placeholder="Votre nom">
+          </div>
+          <div class="form-group">
+            <label for="customerEmail">Votre email *</label>
+            <input type="email" id="customerEmail" [(ngModel)]="newComment.customerEmail" placeholder="votre@email.com">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="rating">Votre note *</label>
+          <div class="rating-input">
+            <span *ngFor="let star of [1,2,3,4,5]" 
+                  [class]="star <= newComment.rating ? 'star filled' : 'star empty'"
+                  (click)="setCommentRating(star)">
+              ★
+            </span>
+            <span class="rating-text">{{ getRatingText(newComment.rating) }}</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="comment">Votre commentaire</label>
+          <textarea id="comment" 
+                    [(ngModel)]="newComment.comment" 
+                    placeholder="Partagez votre expérience avec ce produit..."
+                    rows="4"></textarea>
+        </div>
+        
+        <button class="publish-button" 
+                (click)="publishComment()" 
+                [disabled]="!isCommentValid() || publishingComment">
+          <span *ngIf="!publishingComment">📝 Publier</span>
+          <span *ngIf="publishingComment">Publication...</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Liste des commentaires -->
+    <div class="comments-list" *ngIf="comments.length > 0">
+      <h3>Commentaires clients ({{ comments.length }})</h3>
+      
+      <div class="comment-item" *ngFor="let comment of paginatedComments">
+        <div class="comment-header">
+          <div class="commenter-info">
+            <span class="commenter-name">{{ comment.customerName }}</span>
+            <span class="comment-date" *ngIf="comment.createdAt">
+              {{ formatDate(comment.createdAt!) }}
+            </span>
+          </div>
+          <div class="comment-rating">
+            <div class="stars">
+              <span *ngFor="let star of [1,2,3,4,5]" 
+                    [class]="star <= comment.rating ? 'star filled' : 'star empty'">
+                ★
+              </span>
+            </div>
+            <span class="rating-value">{{ comment.rating.toFixed(1) }}</span>
+          </div>
+        </div>
+        
+        <div class="comment-content" *ngIf="comment.comment">
+          <p>{{ comment.comment }}</p>
+        </div>
+        
+        <div class="comment-badges" *ngIf="comment.isVerified">
+          <span class="badge verified">✓ Achat vérifié</span>
+        </div>
+      </div>
+
+      <!-- Pagination des commentaires -->
+      <div class="comments-pagination" *ngIf="comments.length > commentsPerPage">
+        <button class="pagination-btn" (click)="previousCommentsPage()" [disabled]="currentCommentsPage === 0">
+          ← Précédent
+        </button>
+        <div class="pagination-info">
+          Page {{ currentCommentsPage + 1 }} sur {{ totalCommentsPages }}
+        </div>
+        <button class="pagination-btn" (click)="nextCommentsPage()" [disabled]="currentCommentsPage >= totalCommentsPages - 1">
+          Suivant →
+        </button>
+      </div>
+    </div>
+
+    <!-- Message si aucun commentaire -->
+    <div class="no-comments" *ngIf="comments.length === 0">
+      <p>Aucun commentaire pour ce produit pour le moment.</p>
+    </div>
+  </section>
+</div>
+
+<!-- État de chargement -->
+<div class="loading-container" *ngIf="loading">
+  <div class="loading-spinner"></div>
+  <p>Chargement du produit...</p>
+</div>
+
+<!-- État d'erreur -->
+<div class="error-container" *ngIf="error">
+  <div class="error-message">
+    <h3>Erreur</h3>
+    <p>{{ error }}</p>
+    <button (click)="goBack()">Retour</button>
   </div>
 </div>
-
-<div class="loading-container" *ngIf="loading">
-  <p class="loading-text">Chargement du produit...</p>
-</div>
-
-<div class="error-container" *ngIf="error && !loading">
-  <p class="error-text">{{ error }}</p>
-  <button class="back-button" (click)="goBack()">Retour aux produits</button>
-</div>
-

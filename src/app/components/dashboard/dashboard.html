@@ -10,25 +10,25 @@
         <span class="icon">↻</span>
         Actualiser
       </button>
-      <button type="button" class="btn-danger" (click)="logout()">
-        <span class="icon">🚪</span>
-        Déconnexion
-      </button>
     </div>
   </div>
 
   <!-- Navigation Admin -->
   <div class="admin-nav">
     <nav class="nav-tabs">
-      <button class="nav-tab active" (click)="showProductsSection()">
+      <button class="nav-tab" [class.active]="activeSection === 'sentiments'" (click)="navigateToSentiments()">
+        <span class="icon">📊</span>
+        Analyse Sentiments
+      </button>
+      <button class="nav-tab" [class.active]="activeSection === 'products'" (click)="showProductsSection()">
         <span class="icon">📦</span>
         Produits
       </button>
-      <button class="nav-tab" (click)="navigateToOrders()">
+      <button class="nav-tab" [class.active]="activeSection === 'orders'" (click)="navigateToOrders()">
         <span class="icon">📋</span>
         Commandes
       </button>
-      <button class="nav-tab" (click)="navigateToCustomers()">
+      <button class="nav-tab" [class.active]="activeSection === 'customers'" (click)="navigateToCustomers()">
         <span class="icon">👥</span>
         Clients
       </button>
@@ -37,81 +37,311 @@
 
 
   <div class="dashboard-content">
-    <div *ngIf="loading" class="status loading">
-      <span class="spinner"></span>
-      Chargement des produits...
+    <!-- Section Analyse Sentiments -->
+    <div *ngIf="activeSection === 'sentiments'">
+      <!-- Statistiques Globales -->
+      <div class="global-stats" *ngIf="allProductsAspectData.length > 0">
+        <div class="global-stat-card positive">
+          <div class="stat-icon">👍</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ getGlobalPositiveCount() }}</div>
+            <div class="stat-label">Sentiments Positifs</div>
+          </div>
+        </div>
+        <div class="global-stat-card negative">
+          <div class="stat-icon">👎</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ getGlobalNegativeCount() }}</div>
+            <div class="stat-label">Sentiments Négatifs</div>
+          </div>
+        </div>
+        <div class="global-stat-card total">
+          <div class="stat-icon">💬</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ getGlobalTotalCount() }}</div>
+            <div class="stat-label">Total Mentions</div>
+          </div>
+        </div>
+        <div class="global-stat-card score">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ getGlobalScore() }}%</div>
+            <div class="stat-label">Score Global</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message d'information -->
+      <div class="sentiments-info">
+        <p>Consultez les statistiques détaillées pour chaque produit depuis la colonne Actions.</p>
+      </div>
     </div>
 
-    <div *ngIf="error" class="status error">
-      {{ error }}
-      <button type="button" (click)="refreshProducts()" class="retry-btn">Réessayer</button>
+    <!-- Section Produits -->
+    <div *ngIf="activeSection === 'products'">
+      <div *ngIf="loading" class="status loading">
+        <span class="spinner"></span>
+        Chargement des produits...
+      </div>
+
+      <div *ngIf="error" class="status error">
+        {{ error }}
+        <button type="button" (click)="refreshProducts()" class="retry-btn">Réessayer</button>
+      </div>
+
+      <div *ngIf="!loading && !error" class="products-section">
+        <div class="section-header">
+          <h2>Liste des produits ({{ filteredProducts.length }})</h2>
+        </div>
+
+        <div *ngIf="products.length === 0" class="empty-state">
+          <div class="empty-icon">📦</div>
+          <h3>Aucun produit trouvé</h3>
+          <p>Commencez par ajouter votre premier produit</p>
+          <button type="button" class="btn-primary" (click)="navigateToAddProduct()">
+            Ajouter un produit
+          </button>
+        </div>
+
+        <!-- Barre de recherche visible lorsqu'il existe au moins un produit -->
+        <div class="search-bar" *ngIf="products.length > 0">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Rechercher (nom, catégorie, description)"
+          />
+        </div>
+
+        <!-- Etat vide quand aucune correspondance avec la recherche -->
+        <div *ngIf="products.length > 0 && filteredProducts.length === 0" class="empty-state">
+          <div class="empty-icon">🔎</div>
+          <h3>Aucune correspondance</h3>
+          <p>Aucun produit ne correspond à "{{ searchTerm }}".</p>
+        </div>
+
+        <div *ngIf="filteredProducts.length > 0" class="products-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of filteredProducts" class="product-row">
+                <td class="image-cell">
+                  <img [src]="product.image" [alt]="product.name" class="product-image" />
+                </td>
+                <td class="name-cell">
+                  <strong>{{ product.name }}</strong>
+                </td>
+                <td class="description-cell">
+                  <span class="description-text">{{ product.description }}</span>
+                </td>
+                <td class="category-cell">
+                  <span class="category-badge">{{ product.category }}</span>
+                </td>
+                <td class="price-cell">
+                  <span class="price">{{ product.price | currency:'DH':'symbol':'1.2-2' }}</span>
+                </td>
+                <td class="actions-cell">
+                  <div class="action-buttons">
+                    <button type="button" class="btn-edit" (click)="editProduct(product.id)" title="Modifier">
+                      ✏️
+                    </button>
+                    <button type="button" class="btn-stats" (click)="viewProductStats(product)" title="Analyse Sentiments">
+                      📊
+                    </button>
+                    <button type="button" class="btn-delete" (click)="deleteProduct(product)" title="Supprimer">
+                      🗑️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <div *ngIf="!loading && !error" class="products-section">
+    <!-- Section Commandes -->
+    <div *ngIf="activeSection === 'orders'" class="section-content">
       <div class="section-header">
-        <h2>Liste des produits ({{ filteredProducts.length }})</h2>
+        <h2>Liste des commandes ({{ orders.length }})</h2>
       </div>
 
-      <div *ngIf="products.length === 0" class="empty-state">
-        <div class="empty-icon">📦</div>
-        <h3>Aucun produit trouvé</h3>
-        <p>Commencez par ajouter votre premier produit</p>
-        <button type="button" class="btn-primary" (click)="navigateToAddProduct()">
-          Ajouter un produit
-        </button>
+      <div *ngIf="loading" class="status loading">
+        <span class="spinner"></span>
+        Chargement des commandes...
       </div>
 
-      <!-- Barre de recherche visible lorsqu'il existe au moins un produit -->
-      <div class="search-bar" *ngIf="products.length > 0">
+      <div *ngIf="error" class="status error">
+        {{ error }}
+        <button type="button" (click)="refreshOrders()" class="retry-btn">Réessayer</button>
+      </div>
+
+      <div *ngIf="!loading && !error">
+        <div *ngIf="orders.length === 0" class="empty-state">
+          <div class="empty-icon">📦</div>
+          <h3>Aucune commande trouvée</h3>
+          <p>Les commandes apparaîtront ici une fois passées par les clients</p>
+        </div>
+
+        <div *ngIf="orders.length > 0" class="products-table">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Statut</th>
+                <th>Téléphone</th>
+                <th>Articles</th>
+                <th>Quantité</th>
+                <th>Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orders" class="product-row">
+                <td class="id-cell">
+                  <strong>#{{ order.id }}</strong>
+                </td>
+                <td class="description-cell">
+                  <span>{{ order.date | date:'dd/MM/yyyy' }}</span>
+                </td>
+                <td class="name-cell">
+                  <span *ngIf="order.customer">{{ order.customer.firstName }} {{ order.customer.lastName }}</span>
+                  <span *ngIf="!order.customer" class="text-muted">Client anonyme</span>
+                </td>
+                <td class="category-cell">
+                  <div *ngIf="editingOrderId !== order.id; else editStatus">
+                    <span class="status-badge" [ngClass]="getStatusClass(order.status)">{{ order.status }}</span>
+                  </div>
+                  <ng-template #editStatus>
+                    <select [(ngModel)]="newStatus" class="status-select">
+                      <option value="Processing">Processing</option>
+                      <option value="Shipped">Shipped</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </ng-template>
+                </td>
+                <td class="phone-cell">
+                  <span>{{ order.phoneNumber || 'N/A' }}</span>
+                </td>
+                <td class="name-cell">
+                  <span>{{ order.items.length }} article(s)</span>
+                </td>
+                <td class="price-cell">
+                  <span>{{ getOrderQuantity(order) }}</span>
+                </td>
+                <td class="price-cell">
+                  <span class="price">{{ getOrderTotal(order) | currency:'DH':'symbol':'1.2-2' }}</span>
+                </td>
+                <td class="actions-cell">
+                  <div class="action-buttons">
+                    <button type="button" class="btn-edit" (click)="viewOrder(order)" title="Voir détails">
+                      👁️
+                    </button>
+                    <div *ngIf="editingOrderId !== order.id; else saveCancelButtons">
+                      <button type="button" class="btn-edit" (click)="startEditing(order)" title="Modifier statut">
+                        ✏️
+                      </button>
+                      <button type="button" class="btn-delete" (click)="deleteOrder(order)" title="Supprimer">
+                        🗑️
+                      </button>
+                    </div>
+                    <ng-template #saveCancelButtons>
+                      <button type="button" class="btn-edit" (click)="saveStatus(order)" title="Enregistrer">
+                        💾
+                      </button>
+                      <button type="button" class="btn-delete" (click)="cancelEditing()" title="Annuler">
+                        ❌
+                      </button>
+                    </ng-template>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Clients -->
+    <div *ngIf="activeSection === 'customers'" class="section-content">
+      <div class="section-header">
+        <h2>Liste des clients ({{ filteredCustomers.length }})</h2>
+      </div>
+
+      <div *ngIf="customers.length === 0" class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>Aucun client trouvé</h3>
+        <p>Les clients apparaîtront ici lorsqu'ils s'inscriront</p>
+      </div>
+
+      <!-- Barre de recherche pour les clients -->
+      <div class="search-bar" *ngIf="customers.length > 0">
         <input
           type="text"
           [(ngModel)]="searchTerm"
-          placeholder="Rechercher (nom, catégorie, description)"
+          placeholder="Rechercher (nom, email, téléphone)"
         />
       </div>
 
       <!-- Etat vide quand aucune correspondance avec la recherche -->
-      <div *ngIf="products.length > 0 && filteredProducts.length === 0" class="empty-state">
+      <div *ngIf="customers.length > 0 && filteredCustomers.length === 0" class="empty-state">
         <div class="empty-icon">🔎</div>
         <h3>Aucune correspondance</h3>
-        <p>Aucun produit ne correspond à "{{ searchTerm }}".</p>
+        <p>Aucun client ne correspond à "{{ searchTerm }}".</p>
       </div>
 
-      <div *ngIf="filteredProducts.length > 0" class="products-table">
+      <div *ngIf="filteredCustomers.length > 0" class="products-table">
         <table>
           <thead>
             <tr>
-              <th>Image</th>
+              <th>ID</th>
               <th>Nom</th>
-              <th>Description</th>
-              <th>Catégorie</th>
-              <th>Prix</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th>Adresse</th>
+              <th>Commandes</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let product of filteredProducts" class="product-row">
-              <td class="image-cell">
-                <img [src]="product.image" [alt]="product.name" class="product-image" />
+            <tr *ngFor="let customer of filteredCustomers" class="product-row">
+              <td class="id-cell">
+                <strong>#{{ customer.customer_id }}</strong>
               </td>
               <td class="name-cell">
-                <strong>{{ product.name }}</strong>
+                <strong>{{ customer.firstName }} {{ customer.lastName }}</strong>
               </td>
               <td class="description-cell">
-                <span class="description-text">{{ product.description }}</span>
+                <span>{{ customer.email }}</span>
               </td>
               <td class="category-cell">
-                <span class="category-badge">{{ product.category }}</span>
+                <span>{{ customer.phone || '-' }}</span>
               </td>
               <td class="price-cell">
-                <span class="price">{{ product.price | currency:'DH':'symbol':'1.2-2' }}</span>
+                <span class="description-text">{{ customer.address || '-' }}</span>
+              </td>
+              <td class="phone-cell">
+                <span class="orders-count">{{ customer.orders?.length || 0 }} commande(s)</span>
               </td>
               <td class="actions-cell">
                 <div class="action-buttons">
-                  <button type="button" class="btn-edit" (click)="editProduct(product.id)" title="Modifier">
-                    ✏️
+                  <button type="button" class="btn-edit" (click)="viewCustomer(customer)" title="Voir détails">
+                    👁️
                   </button>
-                  <button type="button" class="btn-delete" (click)="deleteProduct(product)" title="Supprimer">
+                  <button type="button" class="btn-edit" (click)="viewCustomerOrders(customer)" title="Voir commandes">
+                    📋
+                  </button>
+                  <button type="button" class="btn-delete" (click)="deleteCustomer(customer)" title="Supprimer">
                     🗑️
                   </button>
                 </div>
@@ -119,6 +349,239 @@
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Details Modal -->
+<div class="modal-overlay" *ngIf="showCustomerDetailsModal" (click)="closeCustomerDetailsModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeCustomerDetailsModal()">✕</button>
+    
+    <div class="modal-header">
+      <h2>Détails du Client #{{ selectedCustomer?.customer_id }}</h2>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedCustomer">
+      <!-- Customer Info -->
+      <div class="customer-info-section">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Nom complet:</span>
+            <span class="info-value">{{ selectedCustomer.firstName }} {{ selectedCustomer.lastName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{ selectedCustomer.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Téléphone:</span>
+            <span class="info-value">{{ selectedCustomer.phone || 'Non renseigné' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Adresse:</span>
+            <span class="info-value">{{ selectedCustomer.address || 'Non renseignée' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Nombre de commandes:</span>
+            <span class="info-value">{{ selectedCustomer.orders?.length || 0 }} commande(s)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Orders -->
+      <div class="customer-orders-section" *ngIf="selectedCustomer.orders && selectedCustomer.orders.length > 0">
+        <h3>Commandes du Client</h3>
+        <div class="orders-list">
+          <div class="order-item" *ngFor="let order of selectedCustomer.orders">
+            <div class="order-info">
+              <div class="order-id">Commande #{{ order.id }}</div>
+              <div class="order-date">{{ order.date | date:'dd/MM/yyyy' }}</div>
+            </div>
+            <div class="order-details">
+              <div class="order-status">
+                <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+                  {{ order.status }}
+                </span>
+              </div>
+              <div class="order-total">{{ getOrderTotal(order) | currency:'DH':'symbol':'1.2-2' }}</div>
+              <button type="button" class="btn-edit" (click)="viewOrderFromCustomer(order)" title="Voir détails">
+                👁️
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!selectedCustomer.orders || selectedCustomer.orders.length === 0">
+        <div class="empty-icon">📋</div>
+        <h3>Aucune commande</h3>
+        <p>Ce client n'a pas encore passé de commande</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Orders Modal -->
+<div class="modal-overlay" *ngIf="showCustomerOrdersModal" (click)="closeCustomerOrdersModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeCustomerOrdersModal()">✕</button>
+    
+    <div class="modal-header">
+      <h2>Commandes de {{ selectedCustomer?.firstName }} {{ selectedCustomer?.lastName }}</h2>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedCustomer">
+      <div class="products-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Articles</th>
+              <th>Total</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of getCustomerOrders(selectedCustomer)" class="product-row">
+              <td class="id-cell">
+                <strong>#{{ order.id }}</strong>
+              </td>
+              <td class="description-cell">
+                <span>{{ order.date | date:'dd/MM/yyyy' }}</span>
+              </td>
+              <td class="category-cell">
+                <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+                  {{ order.status }}
+                </span>
+              </td>
+              <td class="name-cell">
+                <span>{{ order.items.length }} article(s)</span>
+              </td>
+              <td class="price-cell">
+                <span class="price">{{ getOrderTotal(order) | currency:'DH':'symbol':'1.2-2' }}</span>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button type="button" class="btn-edit" (click)="viewOrderFromCustomer(order)" title="Voir détails">
+                    👁️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" *ngIf="showOrderDetailsModal" (click)="closeOrderDetailsModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeOrderDetailsModal()">✕</button>
+    
+    <div class="modal-header">
+      <h2>Détails de la Commande #{{ selectedOrder?.id }}</h2>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedOrder">
+            <!-- Order Info -->
+            <div class="order-info-section">
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Date de commande:</span>
+                  <span class="info-value">{{ selectedOrder.date | date:'dd/MM/yyyy à HH:mm' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Statut:</span>
+                  <span class="status-badge" [ngClass]="getStatusClass(selectedOrder.status)">
+                    {{ selectedOrder.status }}
+                  </span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Nombre d'articles:</span>
+                  <span class="info-value">{{ selectedOrder.items.length }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Quantité totale:</span>
+                  <span class="info-value">{{ getOrderQuantity(selectedOrder) }}</span>
+                </div>
+                <div class="info-item" *ngIf="selectedOrder.phoneNumber">
+                  <span class="info-label">Téléphone:</span>
+                  <span class="info-value">{{ selectedOrder.phoneNumber }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="customer-info-section" *ngIf="selectedOrder.customer">
+              <h3>Informations Client</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Nom complet:</span>
+                  <span class="info-value">{{ selectedOrder.customer.firstName }} {{ selectedOrder.customer.lastName }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Email:</span>
+                  <span class="info-value">{{ selectedOrder.customer.email }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Téléphone:</span>
+                  <span class="info-value">{{ selectedOrder.customer.phone || 'Non renseigné' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Adresse:</span>
+                  <span class="info-value">{{ selectedOrder.customer.address || 'Non renseignée' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">ID Client:</span>
+                  <span class="info-value">#{{ selectedOrder.customer.customer_id }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Total commandes:</span>
+                  <span class="info-value">{{ getCustomerTotalOrders(selectedOrder.customer) }} commande(s)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer Not Found -->
+            <div class="customer-info-section" *ngIf="!selectedOrder.customer">
+              <h3>Informations Client</h3>
+              <div class="empty-state">
+                <div class="empty-icon">👤</div>
+                <h4>Client anonyme</h4>
+                <p>Cette commande a été passée sans compte client</p>
+              </div>
+            </div>
+
+      <!-- Products List -->
+      <div class="products-section">
+        <h3>Produits Commandés</h3>
+        <div class="products-list">
+          <div class="product-item" *ngFor="let item of selectedOrder.items">
+            <div class="product-info">
+              <div class="product-name">{{ item.product.name }}</div>
+              <div class="product-category">{{ item.product.category }}</div>
+            </div>
+            <div class="product-details">
+              <div class="product-quantity">Qté: {{ item.quantity }}</div>
+              <div class="product-price">{{ item.price | currency:'DH':'symbol':'1.2-2' }}</div>
+              <div class="product-subtotal">
+                <strong>{{ (item.price * item.quantity) | currency:'DH':'symbol':'1.2-2' }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Total -->
+      <div class="order-total-section">
+        <div class="total-row">
+          <span class="total-label">Total de la Commande:</span>
+          <span class="total-amount">{{ getOrderTotal(selectedOrder) | currency:'DH':'symbol':'1.2-2' }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -139,6 +602,51 @@
         (productSaved)="onProductSaved()"
         (cancelled)="closeProductModal()">
       </app-add-product>
+    </div>
+  </div>
+</div>
+
+<!-- Product Stats Modal -->
+<div class="modal-overlay" *ngIf="showStatsModal" (click)="closeStatsModal()">
+  <div class="modal-container simple-modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeStatsModal()">✕</button>
+    <div class="simple-header">
+      <h3>{{ selectedProductForStats?.name }}</h3>
+    </div>
+    <div class="simple-body">
+      <div *ngIf="productStatsData" class="simple-stats">
+        <div class="simple-chart">
+          <div class="chart-row">
+            <span class="chart-label-pos">👍 Positif</span>
+            <div class="progress-bar-simple">
+              <div class="progress-pos" [style.width.%]="getProductPositiveScore()">{{ getProductPositiveScore() }}%</div>
+            </div>
+          </div>
+          <div class="chart-row">
+            <span class="chart-label-neg">👎 Négatif</span>
+            <div class="progress-bar-simple">
+              <div class="progress-neg" [style.width.%]="getProductNegativeScore()">{{ getProductNegativeScore() }}%</div>
+            </div>
+          </div>
+        </div>
+        <div class="aspects-list">
+          <div *ngFor="let aspect of productStatsData" class="aspect-row">
+            <div class="aspect-info">
+              <span class="aspect-name">{{ aspect.topicName }}</span>
+              <span class="aspect-count">{{ aspect.totalMentions }} avis</span>
+            </div>
+            <div class="aspect-ratio">
+              <div class="ratio-bar">
+                <div class="ratio-pos" [style.width.%]="(aspect.positiveCount / aspect.totalMentions) * 100"></div>
+                <div class="ratio-neg" [style.width.%]="(aspect.negativeCount / aspect.totalMentions) * 100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!productStatsData" class="no-stats">
+        <p>📭 Aucune donnée d'analyse disponible pour ce produit</p>
+      </div>
     </div>
   </div>
 </div>

@@ -1,5 +1,6 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -18,6 +19,10 @@ import { AppHttpInterceptor } from './interceptors/app-http-interceptor';
 import { authenticationGuard } from './guards/authentication-guard';
 import { adminGuard } from './guards/admin-guard';
 import { ChatAssistant } from './components/chat-assistant/chat-assistant';
+import { PopularCarousel } from './components/popular-carousel/popular-carousel';
+import { Navbar } from './components/navbar/navbar';
+import { ImageFallbackDirective } from './directives/image-fallback.directive';
+import { ProductReviewsComponent } from './components/product-reviews/product-reviews';
 
 @NgModule({
   declarations: [
@@ -30,15 +35,19 @@ import { ChatAssistant } from './components/chat-assistant/chat-assistant';
     OrderManagement,
     CustomerManagementComponent,
     AuthComponent,
-    ChatAssistant
+    ChatAssistant,
+    PopularCarousel,
+    Navbar,
+    ImageFallbackDirective,
+    ProductReviewsComponent
   ],
   imports: [
     BrowserModule,
+    CommonModule,
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule,
-    AppRoutingModule
+    AppRoutingModule,
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

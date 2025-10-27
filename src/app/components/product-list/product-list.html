@@ -1,85 +1,148 @@
 <section class="product-list">
-  <!-- Section Produits Populaires -->
-  <div class="popular-section" *ngIf="popularProducts.length > 0">
-    <div class="popular-header">
-      <h2>🔥 Produits les Plus Populaires</h2>
-      <p>Les produits les plus commandés par nos clients</p>
-    </div>
-    
-    <div class="popular-grid">
-      <div class="popular-card" *ngFor="let p of popularProducts">
-        <a [routerLink]="['/product', p.id]" class="product-link">
-          <div class="popular-badge">⭐ Populaire</div>
-          <img [src]="p.image" [alt]="p.name" class="image" />
-          <div class="body">
-            <h3 class="name">{{ p.name }}</h3>
-            <div class="category">{{ p.category }}</div>
-            <div class="price">{{ p.price | currency:'DH':'symbol':'1.2-2' }}</div>
-          </div>
-        </a>
-        <div class="actions">
-          <label class="qty-label">Qté
-            <input type="number" min="1" max="99" value="1" [(ngModel)]="quantities[p.id]" (ngModelChange)="updateQuantity(p.id, $event)" placeholder="1" />
-          </label>
-          <button type="button" (click)="addToCart(p)" [disabled]="adding[p.id]" class="add-btn">
-            {{ adding[p.id] ? 'Ajout...' : 'Ajouter' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Carrousel Produits Populaires -->
+  <app-popular-carousel
+    *ngIf="popularProducts.length > 0"
+    [products]="popularProducts">
+  </app-popular-carousel>
 
   <div class="products-header">
     <h2>Tous les Produits</h2>
-    <button 
-      type="button" 
-      (click)="refreshProducts()" 
-      [disabled]="loading"
-      class="refresh-btn"
-      title="Actualiser les produits">
-      <span class="refresh-icon" [class.spinning]="loading">🔄</span>
-      {{ loading ? 'Chargement...' : 'Actualiser' }}
+    <button class="filter-btn" (click)="openFilterSidebar()">
+      <span>🔍</span> Filtres
+      <span *ngIf="getActiveFiltersCount() > 0" class="filter-count">{{ getActiveFiltersCount() }}</span>
     </button>
   </div>
 
-  <!-- Barre de recherche -->
-  <div class="search-bar" *ngIf="!loading">
-    <input
-      type="text"
-      [(ngModel)]="searchTerm"
-      placeholder="Rechercher un produit (nom, catégorie, description)"
-    />
+  <!-- Indicateur des filtres actifs -->
+  <div class="active-filters" *ngIf="getActiveFiltersCount() > 0">
+    <div class="active-filters-header">
+      <button class="clear-all-filters-btn" (click)="clearFilters()">
+        Effacer tout
+      </button>
+    </div>
+    <div class="active-filters-list">
+      <!-- Filtres par origine -->
+      <div class="filter-tag" *ngFor="let origin of getActiveFilterValues('origin')">
+        <span class="filter-tag-label">Origine: {{ origin }}</span>
+        <button class="filter-tag-remove" (click)="removeFilterValue('origin', origin)">×</button>
+      </div>
+      
+      <!-- Filtres par niveau de torréfaction -->
+      <div class="filter-tag" *ngFor="let roastLevel of getActiveFilterValues('roastLevel')">
+        <span class="filter-tag-label">Torréfaction: {{ roastLevel }}</span>
+        <button class="filter-tag-remove" (click)="removeFilterValue('roastLevel', roastLevel)">×</button>
+      </div>
+      
+      <!-- Filtres par marque -->
+      <div class="filter-tag" *ngFor="let brand of getActiveFilterValues('brand')">
+        <span class="filter-tag-label">Marque: {{ brand }}</span>
+        <button class="filter-tag-remove" (click)="removeFilterValue('brand', brand)">×</button>
+      </div>
+      
+      <!-- Filtres par région -->
+      <div class="filter-tag" *ngFor="let region of getActiveFilterValues('region')">
+        <span class="filter-tag-label">Région: {{ region }}</span>
+        <button class="filter-tag-remove" (click)="removeFilterValue('region', region)">×</button>
+      </div>
+      
+      <!-- Filtres par processus -->
+      <div class="filter-tag" *ngFor="let process of getActiveFilterValues('process')">
+        <span class="filter-tag-label">Processus: {{ process }}</span>
+        <button class="filter-tag-remove" (click)="removeFilterValue('process', process)">×</button>
+      </div>
+      
+      <!-- Filtre par prix -->
+      <div class="filter-tag" *ngIf="hasPriceFilter()">
+        <span class="filter-tag-label">Prix: {{ getPriceFilterText() }}</span>
+        <button class="filter-tag-remove" (click)="removePriceFilter()">×</button>
+      </div>
+    </div>
   </div>
 
-  <div *ngIf="loading" class="status">Chargement des produits...</div>
+  <div *ngIf="loading || searchLoading" class="status">Chargement des produits...</div>
   <div *ngIf="error" class="status error">{{ error }}</div>
 
   <!-- Etat vide pour aucune correspondance -->
-  <div *ngIf="!loading && !error && filteredProducts.length === 0" class="status">
-    Aucun produit ne correspond à "{{ searchTerm }}".
+  <div *ngIf="!loading && !searchLoading && !error && products.length === 0" class="status">
+    Aucun produit ne correspond aux critères sélectionnés.
   </div>
 
-  <div class="grid" *ngIf="!loading && !error && filteredProducts.length > 0">
-    <div class="card" *ngFor="let p of filteredProducts">
+  <div class="products-grid" *ngIf="!loading && !searchLoading && !error && products.length > 0">
+    <div class="product-card" *ngFor="let p of products">
       <a [routerLink]="['/product', p.id]" class="product-link">
-        <img [src]="p.image" [alt]="p.name" class="image" />
-        <div class="body">
-          <h3 class="name">{{ p.name }}</h3>
-          <p class="desc">{{ p.description }}</p>
-          <div class="meta">
-            <span class="category">{{ p.category }}</span>
-            <span class="price">{{ p.price | currency:'DH':'symbol':'1.2-2' }}</span>
+        <img [src]="p.image" [alt]="p.name" class="product-card-image" appImageFallback />
+        <div class="product-card-content">
+          <h3 class="product-card-title">{{ p.name }}</h3>
+          <p class="product-card-description">{{ p.description }}</p>
+          <div class="product-meta">
+            <span class="product-origin">{{ p.origin }}</span>
+            <span class="product-roast-level">{{ p.roastLevel }}</span>
+            <span class="product-card-price">{{ p.price | currency:'DH':'symbol':'1.2-2' }}</span>
           </div>
+          
+        <!-- Rating display -->
+        <div class="product-rating" *ngIf="getProductRating(p)">
+          <div class="rating-stars">
+            <span *ngFor="let star of [1,2,3,4,5]"
+                  [class]="star <= getProductRating(p)! ? 'star filled' : 'star empty'">
+              ★
+            </span>
+          </div>
+          <span class="rating-value">{{ getProductRating(p) | number:'1.1-1' }}</span>
+        </div>
         </div>
       </a>
-      <div class="actions">
-        <label class="qty-label">Qté
-          <input type="number" min="1" max="99" value="1" [(ngModel)]="quantities[p.id]" (ngModelChange)="updateQuantity(p.id, $event)" placeholder="1" />
-        </label>
-        <button type="button" (click)="addToCart(p)" [disabled]="adding[p.id]" class="add-btn">
+      <div class="product-card-actions">
+        <div class="quantity-input">
+          <label class="qty-label">Quantité</label>
+          <input type="number" min="1" max="99" value="1" [(ngModel)]="quantities[p.id]" (ngModelChange)="updateQuantity(p.id, $event)" class="form-input form-input-sm" placeholder="1" />
+        </div>
+        <button type="button" (click)="addToCart(p)" [disabled]="adding[p.id]" class="btn-primary btn-sm">
           {{ adding[p.id] ? 'Ajout...' : 'Ajouter au panier' }}
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container" *ngIf="!loading && !searchLoading && !error && totalPages > 1">
+    <div class="pagination-info">
+      <span>Page {{ currentPageNumber + 1 }} sur {{ totalPages }}</span>
+      <span class="total-elements">({{ totalElements }} produits au total)</span>
+    </div>
+    
+    <div class="pagination-controls">
+      <!-- Bouton Précédent -->
+      <button 
+        type="button" 
+        (click)="goToPreviousPage()" 
+        [disabled]="currentPageNumber === 0"
+        class="pagination-btn pagination-btn-prev">
+        <span>‹</span> Précédent
+      </button>
+
+      <!-- Numéros de page -->
+      <div class="pagination-numbers">
+        <button 
+          *ngFor="let page of getPageNumbers()" 
+          type="button"
+          (click)="goToPage(page)"
+          [class.active]="page === currentPageNumber"
+          [class.ellipsis]="page === -1"
+          class="pagination-number"
+          [disabled]="page === -1">
+          {{ page === -1 ? '...' : page + 1 }}
+        </button>
+      </div>
+
+      <!-- Bouton Suivant -->
+      <button 
+        type="button" 
+        (click)="goToNextPage()" 
+        [disabled]="currentPageNumber === totalPages - 1"
+        class="pagination-btn pagination-btn-next">
+        Suivant <span>›</span>
+      </button>
     </div>
   </div>
 
@@ -89,7 +152,7 @@
     <button class="close" (click)="closePanel()">✕</button>
     <ng-container *ngIf="selected as s">
       <div class="panel-header">
-        <img [src]="s.image" [alt]="s.name" />
+        <img [src]="s.image" [alt]="s.name" appImageFallback />
         <div>
           <h3>{{ s.name }}</h3>
           <p class="price">{{ s.price | currency:'DH':'symbol':'1.2-2' }}</p>
@@ -144,5 +207,130 @@
     <ng-template #emptyCart>
       <p class="empty">Votre panier est vide.</p>
     </ng-template>
+  </aside>
+
+  <!-- Filter Sidebar -->
+  <div class="overlay" *ngIf="filterSidebarOpen" (click)="closeFilterSidebar()"></div>
+  <aside class="filter-sidebar" *ngIf="filterSidebarOpen">
+    <div class="filter-header">
+      <h3>Filtres</h3>
+      <button class="close" (click)="closeFilterSidebar()">✕</button>
+    </div>
+
+    <div class="filter-content">
+      <!-- Filtre par origine -->
+      <div class="filter-section">
+        <label>Origine</label>
+        <div class="checkbox-group">
+          <label *ngFor="let option of originOptions" class="checkbox-item">
+            <input 
+              type="checkbox" 
+              [value]="option.value"
+              [checked]="isFilterValueSelected('origin', option.value)"
+              (change)="onCheckboxChange('origin', option.value, $any($event.target).checked)"
+              class="checkbox">
+            <span>{{ option.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Filtre par niveau de torréfaction -->
+      <div class="filter-section">
+        <label>Niveau de torréfaction</label>
+        <div class="checkbox-group">
+          <label *ngFor="let option of roastLevelOptions" class="checkbox-item">
+            <input 
+              type="checkbox" 
+              [value]="option.value"
+              [checked]="isFilterValueSelected('roastLevel', option.value)"
+              (change)="onCheckboxChange('roastLevel', option.value, $any($event.target).checked)"
+              class="checkbox">
+            <span>{{ option.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Filtre par marque -->
+      <div class="filter-section">
+        <label>Marque</label>
+        <div class="checkbox-group">
+          <label *ngFor="let option of brandOptions" class="checkbox-item">
+            <input 
+              type="checkbox" 
+              [value]="option.value"
+              [checked]="isFilterValueSelected('brand', option.value)"
+              (change)="onCheckboxChange('brand', option.value, $any($event.target).checked)"
+              class="checkbox">
+            <span>{{ option.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Filtre par région -->
+      <div class="filter-section">
+        <label>Région</label>
+        <div class="checkbox-group">
+          <label *ngFor="let option of regionOptions" class="checkbox-item">
+            <input 
+              type="checkbox" 
+              [value]="option.value"
+              [checked]="isFilterValueSelected('region', option.value)"
+              (change)="onCheckboxChange('region', option.value, $any($event.target).checked)"
+              class="checkbox">
+            <span>{{ option.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Filtre par processus -->
+      <div class="filter-section">
+        <label>Processus</label>
+        <div class="checkbox-group">
+          <label *ngFor="let option of processOptions" class="checkbox-item">
+            <input 
+              type="checkbox" 
+              [value]="option.value"
+              [checked]="isFilterValueSelected('process', option.value)"
+              (change)="onCheckboxChange('process', option.value, $any($event.target).checked)"
+              class="checkbox">
+            <span>{{ option.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Filtre par prix -->
+      <div class="filter-section">
+        <label>Prix ({{ minPrice | currency:'DH':'symbol':'1.0-0' }} - {{ maxPrice | currency:'DH':'symbol':'1.0-0' }})</label>
+        <div class="price-range">
+          <input 
+            type="range" 
+            [min]="priceRange.min" 
+            [max]="priceRange.max" 
+            [(ngModel)]="minPrice"
+            (ngModelChange)="onPriceRangeChange()"
+            class="price-slider">
+          <input 
+            type="range" 
+            [min]="priceRange.min" 
+            [max]="priceRange.max" 
+            [(ngModel)]="maxPrice"
+            (ngModelChange)="onPriceRangeChange()"
+            class="price-slider">
+        </div>
+        <div class="price-display">
+          <span>{{ minPrice | currency:'DH':'symbol':'1.0-0' }}</span>
+          <span> - </span>
+          <span>{{ maxPrice | currency:'DH':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="filter-actions">
+        <button class="btn-secondary" (click)="clearFilters()">Effacer</button>
+        <button class="btn-primary" (click)="applyFilters()" [disabled]="searchLoading">
+          {{ searchLoading ? 'Recherche...' : 'Appliquer' }}
+        </button>
+      </div>
+    </div>
   </aside>
 </section>

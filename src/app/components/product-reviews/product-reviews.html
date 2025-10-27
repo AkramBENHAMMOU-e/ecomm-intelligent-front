@@ -1,0 +1,101 @@
+<div class="reviews-section">
+  <h3>Avis clients</h3>
+  
+  <!-- Statistiques du produit -->
+  <div class="review-stats" *ngIf="reviewStats">
+    <div class="rating-summary">
+      <div class="stars">
+        <span *ngFor="let star of [1,2,3,4,5]" 
+              [class]="star <= (reviewStats.averageRating || 0) ? 'star filled' : 'star empty'">
+          ★
+        </span>
+      </div>
+      <span class="rating-value">{{ reviewStats.averageRating | number:'1.1-1' }}</span>
+      <span class="rating-description">({{ getRatingDescription(reviewStats.averageRating || 0) }})</span>
+      <span class="review-count">{{ reviewStats.reviewCount || 0 }} avis</span>
+    </div>
+  </div>
+
+  <!-- Formulaire pour laisser un avis -->
+  <div class="add-review-form" *ngIf="showAddForm">
+    <h4>Laisser un avis</h4>
+    <form #reviewForm="ngForm" (ngSubmit)="submitReview(reviewForm)">
+      <div class="form-group">
+        <label for="customerName">Nom *</label>
+        <input type="text" id="customerName" name="customerName" 
+               [(ngModel)]="newReview.customerName" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="customerEmail">Email *</label>
+        <input type="email" id="customerEmail" name="customerEmail" 
+               [(ngModel)]="newReview.customerEmail" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="rating">Note *</label>
+        <div class="rating-input">
+          <span *ngFor="let star of [1,2,3,4,5]" 
+                [class]="star <= newReview.rating ? 'star filled' : 'star empty'"
+                (click)="setRating(star)">
+            ★
+          </span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="comment">Commentaire</label>
+        <textarea id="comment" name="comment" rows="4" 
+                  [(ngModel)]="newReview.comment" placeholder="Partagez votre expérience..."></textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" [disabled]="!reviewForm.form.valid || submitting">
+          {{ submitting ? 'Envoi...' : 'Publier l\'avis' }}
+        </button>
+        <button type="button" (click)="cancelAddReview()">Annuler</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Bouton pour ajouter un avis -->
+  <div class="add-review-button" *ngIf="!showAddForm">
+    <button (click)="showAddReviewForm()">Laisser un avis</button>
+  </div>
+
+  <!-- Liste des avis -->
+  <div class="reviews-list" *ngIf="reviews && reviews.length > 0">
+    <div class="review-item" *ngFor="let review of reviews">
+      <div class="review-header">
+        <div class="reviewer-info">
+          <span class="reviewer-name">{{ review.customerName }}</span>
+          <span class="review-date" *ngIf="review.createdAt">
+            {{ formatDate(review.createdAt) }}
+          </span>
+        </div>
+        <div class="review-rating">
+          <div class="stars">
+            <span *ngFor="let star of [1,2,3,4,5]" 
+                  [class]="star <= review.rating ? 'star filled' : 'star empty'">
+              ★
+            </span>
+          </div>
+          <span class="rating-value">{{ review.rating | number:'1.1-1' }}</span>
+        </div>
+      </div>
+      
+      <div class="review-content" *ngIf="review.comment">
+        <p>{{ review.comment }}</p>
+      </div>
+      
+      <div class="review-badges" *ngIf="review.isVerified">
+        <span class="badge verified">✓ Achat vérifié</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucun avis -->
+  <div class="no-reviews" *ngIf="reviews && reviews.length === 0">
+    <p>Aucun avis pour ce produit pour le moment.</p>
+  </div>
+</div>
